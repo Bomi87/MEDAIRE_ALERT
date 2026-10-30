@@ -5,15 +5,16 @@
 <style>
 :root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#e8edf5;background:#0d1422;font-size:14px}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}.top{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 16px;border-bottom:1px solid #33435d;background:#152136}.top h1{font-size:17px;margin:0 12px 0 0;letter-spacing:.3px}.top small{color:#aabbd2}.shell{display:grid;grid-template-columns:minmax(360px,420px) 1fr;height:calc(100vh - 70px);min-height:480px}.side{min-height:0;display:flex;flex-direction:column;border-right:1px solid #34445b}.controls{padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-bottom:1px solid #34445b}.controls input,.controls select,.connect input{min-width:0;width:100%;background:#202e43;border:1px solid #425671;border-radius:7px;padding:10px;color:#f2f6fb;font-size:16px}.controls #query{grid-column:span 2}.count{padding:9px 12px;color:#acbbd1;border-bottom:1px solid #314057}.feed{overflow:auto;flex:1}.alert{padding:13px;border-bottom:1px solid #2c3b51;cursor:pointer}.alert:hover,.alert.active{background:#20344c}.time{color:#91afd4;font-size:12px}.heading{font-weight:650;line-height:1.45;margin:6px 0}.meta{display:flex;gap:5px;flex-wrap:wrap;color:#aebdd2;font-size:12px}.tag{border:1px solid #4a5d78;border-radius:5px;padding:2px 5px}.sev{color:#f7bf6e}.mapwrap{position:relative}#map{height:100%;width:100%;background:#203348}.connect{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-left:auto}.connect input{width:210px;font-size:13px;padding:8px}.btn{border:1px solid #456b99;background:#213c62;color:#edf5ff;border-radius:7px;padding:8px 10px}.btn:hover{background:#315788}.fileBtn{display:inline-flex;align-items:center}.foot{color:#b4c3d8;font-size:12px;padding:7px 12px;border-top:1px solid #34445b}.icaoIcon{background:#111e32;border:1px solid #d9e6ff;border-radius:6px;padding:3px 6px;color:#fff;font-weight:800;white-space:nowrap;font-size:12px;box-shadow:0 2px 9px #0009}.icaoIcon b{color:#ffca70;font-size:11px;margin-left:4px}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#172338;color:#ebf2ff}.popup{max-height:320px;overflow:auto;max-width:350px}.popup button{display:block;width:100%;border:0;border-bottom:1px solid #344660;background:none;text-align:left;color:#f0f5ff;padding:9px 2px}.popup button:hover{background:#2b3f5a}.notice{padding:12px;color:#bccbe0}.modal{position:fixed;inset:0;background:#000b;z-index:1200;display:none;align-items:center;justify-content:center;padding:12px}.modal.open{display:flex}.modalbody{background:#172439;border:1px solid #4c607b;border-radius:12px;max-width:650px;width:100%;max-height:80vh;overflow:auto;padding:18px;overflow-wrap:anywhere}.close{float:right}.detailtext{line-height:1.7}.detailtext p{margin:8px 0}.status{font-size:12px;color:#b8cee8}.hide{display:none}@media(max-width:760px){.shell{display:flex;flex-direction:column;height:auto}.side{height:48vh;min-height:360px;border-right:0}.mapwrap{height:47vh;min-height:280px;order:-1}.top{padding:9px}.top h1{width:100%}.connect{width:100%;margin:0}.connect input{flex:1;width:100px}.controls{padding:8px}.alert{padding:10px}}
 </style></head>
-<body><header class="top"><h1>✈ MedAire Alert Monitor</h1><span id="status" class="status">데이터를 불러오세요</span><div class="connect"><input id="backend" value="https://script.google.com/macros/s/AKfycbzHiJfw__LOpkZSwx_i0KU3YgCXSxQMocrm175qTbpsus5Ze7VPSnub2rvtpUBexQNQ-Q/exec" placeholder="Apps Script /exec URL" aria-label="백엔드 URL"><input id="viewKey" type="password" autocomplete="off" placeholder="조회 암호(세션 전용)" aria-label="조회 암호"><button class="btn" id="loadRemote">서버 조회</button><label class="btn fileBtn">JSON 불러오기<input class="hide" type="file" id="fileInput" accept=".json,.txt,application/json" multiple></label></div></header>
-<div class="shell"><section class="side"><div class="controls"><input id="query" placeholder="국가, 공항 ICAO, 내용 검색"><select id="country"><option value="">모든 국가</option></select><select id="severity"><option value="">모든 심각도</option></select><select id="category"><option value="">모든 카테고리</option></select><select id="period"><option value="0">전체 기간</option><option value="1">최근 24시간</option><option value="7">최근 7일</option><option value="30" selected>최근 30일</option></select></div><div class="count" id="count">Alert 0건</div><div class="feed" id="feed"><div class="notice">Alert JSON과 공항 JSON 파일을 함께 선택하거나, Apps Script URL과 조회 암호를 입력해 주세요.</div></div><div class="foot">최신 발행 Alert가 항상 맨 위 · 지도에는 위치가 확인된 공항만 표시</div></section><div class="mapwrap"><div id="map"></div></div></div>
+<body><header class="top"><h1>✈ MedAire Alert Monitor</h1><span id="status" class="status">데이터를 불러오세요</span><div class="connect"><input id="backend" value="https://script.google.com/macros/s/AKfycbzHiJfw__LOpkZSwx_i0KU3YgCXSxQMocrm175qTbpsus5Ze7VPSnub2rvtpUBexQNQ-Q/exec" placeholder="Apps Script /exec URL" aria-label="백엔드 URL"><button class="btn" id="loadRemote">서버 조회</button><label class="btn fileBtn">JSON 불러오기<input class="hide" type="file" id="fileInput" accept=".json,.txt,application/json" multiple></label></div></header>
+<div class="shell"><section class="side"><div class="controls"><input id="query" placeholder="국가, 공항 ICAO, 내용 검색"><select id="country"><option value="">모든 국가</option></select><select id="severity"><option value="">모든 심각도</option></select><select id="category"><option value="">모든 카테고리</option></select><select id="period"><option value="0">전체 기간</option><option value="1">최근 24시간</option><option value="7">최근 7일</option><option value="30" selected>최근 30일</option></select></div><div class="count" id="count">Alert 0건</div><div class="feed" id="feed"><div class="notice">Alert JSON과 공항 JSON 파일을 함께 선택하거나, Apps Script에 연결하거나 JSON을 불러오세요.</div></div><div class="foot">최신 발행 Alert가 항상 맨 위 · 지도에는 위치가 확인된 공항만 표시</div></section><div class="mapwrap"><div id="map"></div></div></div>
 <div class="modal" id="modal"><div class="modalbody"><button class="btn close" id="close">닫기 ✕</button><div id="details"></div></div></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
+
 const map=L.map('map',{worldCopyJump:true}).setView([27,20],2);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:19}).addTo(map);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:19}).addTo(map);
 let alerts=[], airports=[], filtered=[], activeId=null;const layer=L.layerGroup().addTo(map);
 const esc=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const plain=s=>{const tmp=document.createElement('template');tmp.innerHTML=String(s??'');return (tmp.content.textContent||'').trim();};
@@ -81,20 +82,21 @@ function openAlert(a){activeId=a.NodeId;const codes=(a.AffectedAirports||[]).map
 $('close').onclick=()=>$('modal').classList.remove('open');$('modal').onclick=e=>{if(e.target===$('modal'))$('modal').classList.remove('open');};
 for(const id of ['query','country','severity','category','period'])$(id).addEventListener(id==='query'?'input':'change',render);
 $('fileInput').addEventListener('change',async e=>{for(const file of e.target.files){try{ingest(JSON.parse(await file.text()));}catch(err){alert(file.name+': '+err.message);}}e.target.value='';});
-// JSONP avoids GAS cross-origin redirect limitations. GET passphrase may be logged.
+// JSONP avoids GAS cross-origin redirect limitations. No credentials are sent from the browser.
 let syncing=false;
-async function sync(){if(syncing)return;const url=$('backend').value.trim(),key=$('viewKey').value;
+async function sync(){if(syncing)return;const url=$('backend').value.trim();
  if(!/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(url)){alert('올바른 Apps Script /exec URL을 입력해 주세요.');return;}
- if(!key){alert('조회 암호를 입력해 주세요.');return;}syncing=true;$('status').textContent='MedAire 조회 중…';
+ syncing=true;$('status').textContent='MedAire 조회 중…';
  const cb='medaireCb'+Date.now(),s=document.createElement('script');let done=false;
  const timer=setTimeout(()=>finish(new Error('서버 응답 시간 초과')),25000);
  function finish(err,data){if(done)return;done=true;clearTimeout(timer);delete window[cb];s.remove();syncing=false;
  if(err){$('status').textContent='오류: '+err.message;return;}try{ingest(data);}catch(e){$('status').textContent='오류: '+e.message;}}
  window[cb]=data=>finish(null,data);
  s.onerror=()=>finish(new Error('네트워크 오류 / 배포 또는 권한 확인'));
- s.src=url+'?action=feed&callback='+encodeURIComponent(cb)+'&key='+encodeURIComponent(key);
+ s.src=url+'?action=feed&callback='+encodeURIComponent(cb);
  document.head.append(s);
 }
 $('loadRemote').onclick=sync;
-setInterval(()=>{if($('backend').value.trim()&&$('viewKey').value)sync();},300000);
+setInterval(()=>{if($('backend').value.trim())sync();},300000);
+sync();
 </script></body></html>
