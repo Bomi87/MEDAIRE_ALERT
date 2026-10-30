@@ -3,7 +3,7 @@
 <title>MedAire Alert Monitor</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoqVMy7MbVn8=" crossorigin="">
 <style>
-:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#e8edf5;background:#0d1422;font-size:14px}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}.top{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 16px;border-bottom:1px solid #33435d;background:#152136}.top h1{font-size:17px;margin:0 12px 0 0;letter-spacing:.3px}.top small{color:#aabbd2}.shell{display:grid;grid-template-columns:minmax(480px,40%) minmax(0,1fr);height:calc(100vh - 70px);min-height:480px}.side{min-height:0;display:flex;flex-direction:column;border-right:1px solid #34445b}.controls{padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-bottom:1px solid #34445b}.controls input,.controls select,.connect input{min-width:0;width:100%;background:#202e43;border:1px solid #425671;border-radius:7px;padding:10px;color:#f2f6fb;font-size:16px}.controls #query{grid-column:span 2}.count{padding:9px 12px;color:#acbbd1;border-bottom:1px solid #314057}.feed{overflow:auto;flex:1}.alert{padding:13px;border-bottom:1px solid #2c3b51;cursor:pointer}.alert:hover,.alert.active{background:#20344c}.time{color:#91afd4;font-size:12px}.heading{font-weight:650;line-height:1.45;margin:6px 0}.meta{display:flex;gap:5px;flex-wrap:wrap;color:#aebdd2;font-size:12px}.tag{border:1px solid #4a5d78;border-radius:5px;padding:2px 5px}.sev{color:#f7bf6e}.mapwrap{position:relative;min-width:0;overflow:hidden}#mapstate{position:absolute;left:12px;top:12px;z-index:900;background:#101e30e8;border:1px solid #54708c;color:#e4f2ff;padding:8px 12px;border-radius:6px;font-size:12px;pointer-events:none}#mapstate[hidden]{display:none}#map{height:100%;width:100%;background:#203348}.connect{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-left:auto}.connect input{width:210px;font-size:13px;padding:8px}.btn{border:1px solid #456b99;background:#213c62;color:#edf5ff;border-radius:7px;padding:8px 10px}.btn:hover{background:#315788}.fileBtn{display:inline-flex;align-items:center}.foot{color:#b4c3d8;font-size:12px;padding:7px 12px;border-top:1px solid #34445b}.icaoIcon{background:#111e32;border:1px solid #d9e6ff;border-radius:6px;padding:3px 6px;color:#fff;font-weight:800;white-space:nowrap;font-size:12px;box-shadow:0 2px 9px #0009}.sosPin{display:flex;align-items:center;justify-content:center;width:21px;height:21px;border-radius:50%;border:2px solid #fff;background:#ef8537;color:#101827;font-size:10px;font-weight:900;box-shadow:0 2px 8px #000b}.countryPin{display:inline-flex;align-items:center;justify-content:center;min-width:23px;height:23px;padding:0 4px;border-radius:5px;border:1.5px solid #e3eefd;background:#33749b;color:white;font-weight:800;font-size:10px;box-shadow:0 2px 7px #0009}.regionPin{display:inline-flex;align-items:center;justify-content:center;min-width:23px;height:23px;padding:0 4px;border-radius:5px;border:1.5px solid #f1dbff;background:#81539c;color:white;font-weight:800;font-size:10px;box-shadow:0 2px 7px #0009}.icaoIcon b{color:#ffca70;font-size:11px;margin-left:4px}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#172338;color:#ebf2ff}.popup{max-height:320px;overflow:auto;max-width:350px}.popup button{display:block;width:100%;border:0;border-bottom:1px solid #344660;background:none;text-align:left;color:#f0f5ff;padding:9px 2px}.popup button:hover{background:#2b3f5a}.notice{padding:12px;color:#bccbe0}.modal{position:fixed;inset:0;background:#000b;z-index:1200;display:none;align-items:center;justify-content:center;padding:12px}.modal.open{display:flex}.modalbody{background:#172439;border:1px solid #4c607b;border-radius:12px;max-width:650px;width:100%;max-height:80vh;overflow:auto;padding:18px;overflow-wrap:anywhere}.close{float:right}.detailtext{line-height:1.7}.detailtext p{margin:8px 0}.status{font-size:12px;color:#b8cee8}.hide{display:none}@media(max-width:760px){.shell{display:flex;flex-direction:column;height:auto}.side{height:48vh;min-height:360px;border-right:0}.mapwrap{height:47vh;min-height:280px;order:-1}.top{padding:9px}.top h1{width:100%}.connect{width:100%;margin:0}.connect input{flex:1;width:100px}.controls{padding:8px}.alert{padding:10px}}
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#e8edf5;background:#0d1422;font-size:14px}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}.top{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 16px;border-bottom:1px solid #33435d;background:#152136}.top h1{font-size:17px;margin:0 12px 0 0;letter-spacing:.3px}.top small{color:#aabbd2}.shell{display:grid;grid-template-columns:minmax(480px,40%) minmax(0,1fr);height:calc(100vh - 70px);min-height:480px}.side{min-height:0;display:flex;flex-direction:column;border-right:1px solid #34445b}.controls{padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-bottom:1px solid #34445b}.controls input,.controls select,.connect input{min-width:0;width:100%;background:#202e43;border:1px solid #425671;border-radius:7px;padding:10px;color:#f2f6fb;font-size:16px}.controls #query{grid-column:span 2}.count{padding:9px 12px;color:#acbbd1;border-bottom:1px solid #314057}.feed{overflow:auto;flex:1}.alert{padding:13px;border-bottom:1px solid #2c3b51;cursor:pointer}.alert:hover,.alert.active{background:#20344c}.time{color:#91afd4;font-size:12px}.heading{font-weight:650;line-height:1.45;margin:6px 0}.meta{display:flex;gap:5px;flex-wrap:wrap;color:#aebdd2;font-size:12px}.tag{border:1px solid #4a5d78;border-radius:5px;padding:2px 5px}.sev{font-weight:800}.sev-danger{color:#ff646b;border-color:#a94b52;background:#5b222c55}.sev-warning{color:#ffbd68;border-color:#aa7835;background:#66401e55}.sev-success{color:#65d69c;border-color:#38865b;background:#204f3955}.mapwrap{position:relative;min-width:0;overflow:hidden}#mapstate{position:absolute;left:12px;top:12px;z-index:900;background:#101e30e8;border:1px solid #54708c;color:#e4f2ff;padding:8px 12px;border-radius:6px;font-size:12px;pointer-events:none}#mapstate[hidden]{display:none}#map{height:100%;width:100%;background:#203348}.connect{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-left:auto}.connect input{width:210px;font-size:13px;padding:8px}.btn{border:1px solid #456b99;background:#213c62;color:#edf5ff;border-radius:7px;padding:8px 10px}.btn:hover{background:#315788}.fileBtn{display:inline-flex;align-items:center}.foot{color:#b4c3d8;font-size:12px;padding:7px 12px;border-top:1px solid #34445b}.icaoIcon{background:#111e32;border:1px solid #d9e6ff;border-radius:6px;padding:3px 6px;color:#fff;font-weight:800;white-space:nowrap;font-size:12px;box-shadow:0 2px 9px #0009}.sosPin{display:flex;align-items:center;justify-content:center;width:21px;height:21px;border-radius:50%;border:2px solid #fff;background:#ef8537;color:#101827;font-size:10px;font-weight:900;box-shadow:0 2px 8px #000b}.countryPin{display:inline-flex;align-items:center;justify-content:center;min-width:23px;height:23px;padding:0 4px;border-radius:5px;border:1.5px solid #e3eefd;background:#33749b;color:white;font-weight:800;font-size:10px;box-shadow:0 2px 7px #0009}.regionPin{display:inline-flex;align-items:center;justify-content:center;min-width:23px;height:23px;padding:0 4px;border-radius:5px;border:1.5px solid #f1dbff;background:#81539c;color:white;font-weight:800;font-size:10px;box-shadow:0 2px 7px #0009}.icaoIcon b{color:#ffca70;font-size:11px;margin-left:4px}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#172338;color:#ebf2ff}.popup{max-height:320px;overflow:auto;max-width:350px}.popup button{display:block;width:100%;border:0;border-bottom:1px solid #344660;background:none;text-align:left;color:#f0f5ff;padding:9px 2px}.popup button:hover{background:#2b3f5a}.notice{padding:12px;color:#bccbe0}.modal{position:fixed;inset:0;background:#000b;z-index:1200;display:none;align-items:center;justify-content:center;padding:12px}.modal.open{display:flex}.modalbody{background:#172439;border:1px solid #4c607b;border-radius:12px;max-width:650px;width:100%;max-height:80vh;overflow:auto;padding:18px;overflow-wrap:anywhere}.close{float:right}.detailtext{line-height:1.7}.detailtext p{margin:8px 0}.status{font-size:12px;color:#b8cee8}.hide{display:none}@media(max-width:760px){.shell{display:flex;flex-direction:column;height:auto}.side{height:48vh;min-height:360px;border-right:0}.mapwrap{height:47vh;min-height:280px;order:-1}.top{padding:9px}.top h1{width:100%}.connect{width:100%;margin:0}.connect input{flex:1;width:100px}.controls{padding:8px}.alert{padding:10px}}
 
 /* Markers rendered in a separate DOM overlay above the vector Canvas, independent of Leaflet pane order. */
 #alert-overlay{position:absolute;inset:0;z-index:650;pointer-events:none;overflow:hidden}
@@ -11,6 +11,12 @@
 .alert-map-point:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:5px}
 .alert-map-point .icaoIcon,.alert-map-point .sosPin,.alert-map-point .countryPin,.alert-map-point .regionPin{display:inline-flex;align-items:center;justify-content:center}
 .group-reset{margin-left:auto;flex-shrink:0;background:#294566;border:1px solid #6082a6;color:#fff;border-radius:5px;padding:4px 9px;font-size:12px}.count:has(.group-reset){display:flex;align-items:center;gap:8px;justify-content:space-between}.feed-group-heading{position:sticky;top:0;z-index:2;padding:10px 12px;background:#243b54;color:#ffd18f;border-bottom:1px solid #6d84a0;font-weight:750;font-size:12px}.popup-group{font-size:12px;font-weight:750;color:#ffc27d;background:#24364d;padding:7px 6px;margin-top:10px;border-radius:5px}.popup-empty{padding:9px 3px;color:#99afc7;font-size:12px}
+/* Scope label appears first in each alert's tag row. */
+.scopeTag{font-weight:800;white-space:nowrap;color:#f5f8ff}
+.scope-icao{background:#263f67;border-color:#a8c9fa}
+.scope-local{background:#683b1f;border-color:#e7a361}
+.scope-region{background:#53336e;border-color:#c6a0e6}
+.scope-country{background:#1d536e;border-color:#77b9da}
 /* Mobile compact controls: prioritize the Alert feed over search/filter chrome. */
 @media (max-width:760px){
   .top{padding:5px 8px;gap:4px;}
@@ -77,11 +83,13 @@ function ingest(data){
  // After a successful server load, show newest items first, even if previously scrolled.
  $('feed').scrollTop=0;
 }
+function severityClass(value){const s=String(value||'').trim().toLowerCase();return s==='special advisory'?'sev-danger':s==='advisory'?'sev-warning':s==='notice'?'sev-success':'';}
+function severityKo(value){const names={'special advisory':'심각','advisory':'중간','notice':'낮음'};return names[String(value||'').trim().toLowerCase()]||String(value||'');}
 function rebuildOptions(){
  const choices=[['country',a=>a.SelectedCountry||a.TitleLocation||a.CountriesAffected?.[0]?.Name],['severity',a=>a.Severity],['category',a=>a.Categories||[]]];
  for(const [id,get] of choices){const el=$(id),prev=el.value,first=el.options[0].textContent;
  const values=[...new Set(alerts.flatMap(a=>{const x=get(a);return Array.isArray(x)?x:[x]}).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b)));
- el.replaceChildren(new Option(first,''),...values.map(v=>new Option(v,v)));el.value=values.includes(prev)?prev:'';}
+ el.replaceChildren(new Option(first,''),...values.map(v=>new Option(id==='severity'?severityKo(v):v,v)));el.value=values.includes(prev)?prev:'';}
 }
 function render(){
  const q=$('query').value.trim().toLowerCase(),country=$('country').value,sev=$('severity').value,cat=$('category').value,days=Number($('period').value);
@@ -117,7 +125,7 @@ function render(){
  function appendArticles(records){
  for(const a of records){const d=document.createElement('div');d.className='alert'+(String(a.Id??a.NodeId)===String(activeId)?' active':'');
  const date=(a.Date||a.CreatedDate)?new Date(a.Date||a.CreatedDate).toLocaleString('ko-KR',{hour12:false}):'시간 미상';
- d.innerHTML=`<div class="time">${esc(date)} · ${esc(a.SelectedCountry||a.TitleLocation||'')}</div><div class="heading">${esc(plain(a.Heading)||a.Title||'Alert')}</div><div class="meta"><span class="tag sev">${esc(a.Severity||'')}</span><span class="tag">${esc(a.Source||'Aviation')}</span>${(a.AffectedAirports||[]).map(c=>`<span class="tag">${esc(c)}</span>`).join('')}${(a.Categories||[]).slice(0,3).map(c=>`<span class="tag">${esc(c)}</span>`).join('')}</div>`;
+ d.innerHTML=`<div class="time">${esc(date)} · ${esc(a.SelectedCountry||a.TitleLocation||'')}</div><div class="heading">${esc(plain(a.Heading)||a.Title||'Alert')}</div><div class="meta"><span class="tag scopeTag scope-${alertScope(a)}">${scopeLabels[alertScope(a)]}</span><span class="tag sev ${severityClass(a.Severity)}">${esc(severityKo(a.Severity||''))}</span><span class="tag">${esc(a.Source||'Aviation')}</span>${(a.AffectedAirports||[]).map(c=>`<span class="tag">${esc(c)}</span>`).join('')}${(a.Categories||[]).slice(0,3).map(c=>`<span class="tag">${esc(c)}</span>`).join('')}</div>`;
  d.onclick=()=>openAlert(a);frag.append(d);}
  }
  if(displayGroups){
@@ -207,6 +215,19 @@ function pointScope(p,a){
  if(/^(nationwide|countrywide|across the country|multiple locations|various locations|national|country|entire country)$/.test(name))return 'country';
  return 'local';
 }
+// One classification shared by the feed and the map.
+// A specific airport takes precedence over local / regional / country scope.
+function alertScope(a){
+  if(Array.isArray(a.AffectedAirports) && a.AffectedAirports.some(c=>String(c||'').trim())) return 'icao';
+  const points=locationPoints(a);
+  const scopes=points.map(p=>pointScope(p,a));
+  if(scopes.includes('local'))return 'local';
+  if(scopes.includes('region'))return 'region';
+  if(scopes.includes('country'))return 'country';
+  return 'region'; // Unlocated notice: broader/unspecified, never falsely a specific point.
+}
+const scopeLabels={icao:'공항',local:'특정지점',region:'광역',country:'국가'};
+const markerPriority={country:100,region:200,local:300,icao:400};
 function articleKey(a){return String(a.Id??a.NodeId??(a.Title||a.Heading||'')+'|'+(a.Date||a.CreatedDate||''));}
 function alertPopup(title,items){
  const panel=document.createElement('div');panel.className='popup';
@@ -277,6 +298,7 @@ function drawMarkers(){
   function addOverlay(coords,label,items,mode){
     const btn=document.createElement('button');
     btn.type='button';btn.className='alert-map-point';
+    btn.style.zIndex=String(markerPriority[mode]||100);
     btn.setAttribute('aria-label',label+' · '+items.length+' Alert · '+(mode==='icao'?'공항':mode==='local'?'특정 위치':mode==='country'?'국가 전체':'광역'));btn.title=(mode==='country'?'국가 대표 위치 (사건 위치 아님)':mode==='region'?'광역 대표 위치 (사건 위치 아님)':mode==='local'?'특정 위치 Alert':'공항 Alert');
     const span=document.createElement('span');
     span.className=mode==='icao'?'icaoIcon':mode==='local'?'sosPin':mode==='country'?'countryPin':'regionPin';
@@ -292,16 +314,18 @@ function drawMarkers(){
     alertOverlay.append(btn);
     overlayRecords.push({el:btn,coords});
   }
-  for(const [code,items] of byCode)addOverlay(coords.get(code),code,items,'icao');
+  // Draw low-priority markers first as an additional stacking safeguard.
+  for(const {p,items,scope} of byCountry.values())if(scope==='country')addOverlay([p.lat,p.lng],p.name||'Country',items,'country');
+  for(const {p,items,scope} of byCountry.values())if(scope!=='country')addOverlay([p.lat,p.lng],p.name||'Region',items,'region');
   for(const {p,items} of byPoint.values())addOverlay([p.lat,p.lng],p.name||'Alert location',items,'local');
-  for(const {p,items,scope} of byCountry.values())addOverlay([p.lat,p.lng],p.name||'Country / region',items,scope);
+  for(const [code,items] of byCode)addOverlay(coords.get(code),code,items,'icao');
   schedulePositionMarkers();
   if(!overlayRecords.length&&filtered.length){mapState.hidden=false;mapState.textContent='표시할 위치 정보가 없습니다';}
   else mapState.hidden=true;
 }
 
 function openAlert(a){activeId=a.Id??a.NodeId;const codes=(a.AffectedAirports||[]).map(String),name=plain(a.Heading)||a.Title||'Alert';
- $('details').innerHTML=`<div class="time">${esc(a.Date?new Date(a.Date).toLocaleString('ko-KR',{hour12:false}):'')} · ${esc(a.SelectedCountry||'')}</div><h2>${esc(name)}</h2><p><b>Source:</b> ${esc(a.Source||'Aviation')}<br><b>Severity:</b> ${esc(a.Severity||'–')}<br><b>Status:</b> ${esc(a.AlertStatus||'–')}<br><b>ICAO:</b> ${esc(codes.join(', ')||'–')}<br><b>Category:</b> ${esc((a.Categories||[]).join(', '))}</p><div class="detailtext" id="bodyText"></div>`;
+ $('details').innerHTML=`<div class="time">${esc(a.Date?new Date(a.Date).toLocaleString('ko-KR',{hour12:false}):'')} · ${esc(a.SelectedCountry||'')}</div><h2>${esc(name)}</h2><p><b>Source:</b> ${esc(a.Source||'Aviation')}<br><b>Severity:</b> <span class="tag sev ${severityClass(a.Severity)}">${esc(severityKo(a.Severity||'–'))}</span><br><b>Status:</b> ${esc(a.AlertStatus||'–')}<br><b>ICAO:</b> ${esc(codes.join(', ')||'–')}<br><b>Category:</b> ${esc((a.Categories||[]).join(', '))}</p><div class="detailtext" id="bodyText"></div>`;
  const sections=[['Summary',a.Summary||a.Blocks],['Traveller advice',a.TravellerAdvice],['More detail',a.MoreDetail]];
  const dest=$('bodyText');dest.replaceChildren();
  for(const [label,html] of sections){if(!html)continue;const h=document.createElement('h3');h.textContent=label;const body=document.createElement('div');body.textContent=plain(html);body.style.whiteSpace='pre-line';dest.append(h,body);}
