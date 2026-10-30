@@ -3,7 +3,7 @@
 <title>MedAire Alert Monitor</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoqVMy7MbVn8=" crossorigin="">
 <style>
-:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#e8edf5;background:#0d1422;font-size:14px}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}.top{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 16px;border-bottom:1px solid #33435d;background:#152136}.top h1{font-size:17px;margin:0 12px 0 0;letter-spacing:.3px}.top small{color:#aabbd2}.shell{display:grid;grid-template-columns:minmax(360px,420px) 1fr;height:calc(100vh - 70px);min-height:480px}.side{min-height:0;display:flex;flex-direction:column;border-right:1px solid #34445b}.controls{padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-bottom:1px solid #34445b}.controls input,.controls select,.connect input{min-width:0;width:100%;background:#202e43;border:1px solid #425671;border-radius:7px;padding:10px;color:#f2f6fb;font-size:16px}.controls #query{grid-column:span 2}.count{padding:9px 12px;color:#acbbd1;border-bottom:1px solid #314057}.feed{overflow:auto;flex:1}.alert{padding:13px;border-bottom:1px solid #2c3b51;cursor:pointer}.alert:hover,.alert.active{background:#20344c}.time{color:#91afd4;font-size:12px}.heading{font-weight:650;line-height:1.45;margin:6px 0}.meta{display:flex;gap:5px;flex-wrap:wrap;color:#aebdd2;font-size:12px}.tag{border:1px solid #4a5d78;border-radius:5px;padding:2px 5px}.sev{color:#f7bf6e}.mapwrap{position:relative;min-width:0;overflow:hidden}#mapstate{position:absolute;left:12px;top:12px;z-index:900;background:#101e30e8;border:1px solid #54708c;color:#e4f2ff;padding:8px 12px;border-radius:6px;font-size:12px;pointer-events:none}#mapstate[hidden]{display:none}#map{height:100%;width:100%;background:#203348}.connect{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-left:auto}.connect input{width:210px;font-size:13px;padding:8px}.btn{border:1px solid #456b99;background:#213c62;color:#edf5ff;border-radius:7px;padding:8px 10px}.btn:hover{background:#315788}.fileBtn{display:inline-flex;align-items:center}.foot{color:#b4c3d8;font-size:12px;padding:7px 12px;border-top:1px solid #34445b}.icaoIcon{background:#111e32;border:1px solid #d9e6ff;border-radius:6px;padding:3px 6px;color:#fff;font-weight:800;white-space:nowrap;font-size:12px;box-shadow:0 2px 9px #0009}.icaoIcon b{color:#ffca70;font-size:11px;margin-left:4px}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#172338;color:#ebf2ff}.popup{max-height:320px;overflow:auto;max-width:350px}.popup button{display:block;width:100%;border:0;border-bottom:1px solid #344660;background:none;text-align:left;color:#f0f5ff;padding:9px 2px}.popup button:hover{background:#2b3f5a}.notice{padding:12px;color:#bccbe0}.modal{position:fixed;inset:0;background:#000b;z-index:1200;display:none;align-items:center;justify-content:center;padding:12px}.modal.open{display:flex}.modalbody{background:#172439;border:1px solid #4c607b;border-radius:12px;max-width:650px;width:100%;max-height:80vh;overflow:auto;padding:18px;overflow-wrap:anywhere}.close{float:right}.detailtext{line-height:1.7}.detailtext p{margin:8px 0}.status{font-size:12px;color:#b8cee8}.hide{display:none}@media(max-width:760px){.shell{display:flex;flex-direction:column;height:auto}.side{height:48vh;min-height:360px;border-right:0}.mapwrap{height:47vh;min-height:280px;order:-1}.top{padding:9px}.top h1{width:100%}.connect{width:100%;margin:0}.connect input{flex:1;width:100px}.controls{padding:8px}.alert{padding:10px}}
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#e8edf5;background:#0d1422;font-size:14px}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}.top{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 16px;border-bottom:1px solid #33435d;background:#152136}.top h1{font-size:17px;margin:0 12px 0 0;letter-spacing:.3px}.top small{color:#aabbd2}.shell{display:grid;grid-template-columns:minmax(360px,420px) 1fr;height:calc(100vh - 70px);min-height:480px}.side{min-height:0;display:flex;flex-direction:column;border-right:1px solid #34445b}.controls{padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-bottom:1px solid #34445b}.controls input,.controls select,.connect input{min-width:0;width:100%;background:#202e43;border:1px solid #425671;border-radius:7px;padding:10px;color:#f2f6fb;font-size:16px}.controls #query{grid-column:span 2}.count{padding:9px 12px;color:#acbbd1;border-bottom:1px solid #314057}.feed{overflow:auto;flex:1}.alert{padding:13px;border-bottom:1px solid #2c3b51;cursor:pointer}.alert:hover,.alert.active{background:#20344c}.time{color:#91afd4;font-size:12px}.heading{font-weight:650;line-height:1.45;margin:6px 0}.meta{display:flex;gap:5px;flex-wrap:wrap;color:#aebdd2;font-size:12px}.tag{border:1px solid #4a5d78;border-radius:5px;padding:2px 5px}.sev{color:#f7bf6e}.mapwrap{position:relative;min-width:0;overflow:hidden}#mapstate{position:absolute;left:12px;top:12px;z-index:900;background:#101e30e8;border:1px solid #54708c;color:#e4f2ff;padding:8px 12px;border-radius:6px;font-size:12px;pointer-events:none}#mapstate[hidden]{display:none}#map{height:100%;width:100%;background:#203348}.connect{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-left:auto}.connect input{width:210px;font-size:13px;padding:8px}.btn{border:1px solid #456b99;background:#213c62;color:#edf5ff;border-radius:7px;padding:8px 10px}.btn:hover{background:#315788}.fileBtn{display:inline-flex;align-items:center}.foot{color:#b4c3d8;font-size:12px;padding:7px 12px;border-top:1px solid #34445b}.icaoIcon{background:#111e32;border:1px solid #d9e6ff;border-radius:6px;padding:3px 6px;color:#fff;font-weight:800;white-space:nowrap;font-size:12px;box-shadow:0 2px 9px #0009}.sosPin{display:flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:50%;border:2px solid #fff;background:#ef8537;color:#101827;font-size:12px;font-weight:900;box-shadow:0 2px 8px #000b}.icaoIcon b{color:#ffca70;font-size:11px;margin-left:4px}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#172338;color:#ebf2ff}.popup{max-height:320px;overflow:auto;max-width:350px}.popup button{display:block;width:100%;border:0;border-bottom:1px solid #344660;background:none;text-align:left;color:#f0f5ff;padding:9px 2px}.popup button:hover{background:#2b3f5a}.notice{padding:12px;color:#bccbe0}.modal{position:fixed;inset:0;background:#000b;z-index:1200;display:none;align-items:center;justify-content:center;padding:12px}.modal.open{display:flex}.modalbody{background:#172439;border:1px solid #4c607b;border-radius:12px;max-width:650px;width:100%;max-height:80vh;overflow:auto;padding:18px;overflow-wrap:anywhere}.close{float:right}.detailtext{line-height:1.7}.detailtext p{margin:8px 0}.status{font-size:12px;color:#b8cee8}.hide{display:none}@media(max-width:760px){.shell{display:flex;flex-direction:column;height:auto}.side{height:48vh;min-height:360px;border-right:0}.mapwrap{height:47vh;min-height:280px;order:-1}.top{padding:9px}.top h1{width:100%}.connect{width:100%;margin:0}.connect input{flex:1;width:100px}.controls{padding:8px}.alert{padding:10px}}
 </style></head>
 <body><header class="top"><h1>✈ MedAire Alert Monitor</h1><span id="status" class="status">데이터를 불러오세요</span><div class="connect"><input id="backend" value="https://script.google.com/macros/s/AKfycbzHiJfw__LOpkZSwx_i0KU3YgCXSxQMocrm175qTbpsus5Ze7VPSnub2rvtpUBexQNQ-Q/exec" placeholder="Apps Script /exec URL" aria-label="백엔드 URL"><button class="btn" id="loadRemote">서버 조회</button><label class="btn fileBtn">JSON 불러오기<input class="hide" type="file" id="fileInput" accept=".json,.txt,application/json" multiple></label></div></header>
 <div class="shell"><section class="side"><div class="controls"><input id="query" placeholder="국가, 공항 ICAO, 내용 검색"><select id="country"><option value="">모든 국가</option></select><select id="severity"><option value="">모든 심각도</option></select><select id="category"><option value="">모든 카테고리</option></select><select id="period"><option value="0">전체 기간</option><option value="1">최근 24시간</option><option value="7">최근 7일</option><option value="30" selected>최근 30일</option></select></div><div class="count" id="count">Alert 0건</div><div class="feed" id="feed"><div class="notice">서버에서 Alert를 자동 조회합니다.</div></div><div class="foot">최신 발행 Alert가 항상 맨 위 · 지도에는 ICAO 공항 및 위치 좌표 표시</div></section><div class="mapwrap"><div id="map"></div><div id="mapstate" role="status">지도 준비 중…</div></div></div>
@@ -21,9 +21,10 @@ const basemapCanvas=L.canvas({padding:0.1});
 L.polygon(landShapes.map(ring=>ring.map(([lng,lat])=>[lat,lng])),{renderer:basemapCanvas,stroke:true,color:'#68899a',weight:0.65,fillColor:'#365969',fillOpacity:1,interactive:false,smoothFactor:1}).addTo(map);
 L.polyline(countryLines.map(line=>line.map(([lng,lat])=>[lat,lng])),{renderer:basemapCanvas,color:'#7595a4',weight:0.55,opacity:0.8,interactive:false,smoothFactor:1}).addTo(map);
 const mapState=$('mapstate');
-mapState.textContent='경량 벡터 지도 · 외부 타일 요청 없음';
-setTimeout(()=>{mapState.hidden=true;},3500);
-let alerts=[], airports=[], filtered=[], activeId=null;const layer=L.layerGroup().addTo(map);
+mapState.hidden=true;
+let alerts=[], airports=[], filtered=[], activeId=null;
+map.createPane('alertMarkers');map.getPane('alertMarkers').style.zIndex='650';
+const layer=L.layerGroup().addTo(map);
 const esc=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const plain=s=>{const tmp=document.createElement('template');tmp.innerHTML=String(s??'');return (tmp.content.textContent||'').trim();};
 const sortDate=a=>Date.parse(a.Date||a.CreatedDate||0)||0;
@@ -71,38 +72,52 @@ function render(){
  const date=(a.Date||a.CreatedDate)?new Date(a.Date||a.CreatedDate).toLocaleString('ko-KR',{hour12:false}):'시간 미상';
  d.innerHTML=`<div class="time">${esc(date)} · ${esc(a.SelectedCountry||a.TitleLocation||'')}</div><div class="heading">${esc(plain(a.Heading)||a.Title||'Alert')}</div><div class="meta"><span class="tag sev">${esc(a.Severity||'')}</span><span class="tag">${esc(a.Source||'Aviation')}</span>${(a.AffectedAirports||[]).map(c=>`<span class="tag">${esc(c)}</span>`).join('')}${(a.Categories||[]).slice(0,3).map(c=>`<span class="tag">${esc(c)}</span>`).join('')}</div>`;
  d.onclick=()=>openAlert(a);frag.append(d);}
- feed.append(frag);drawMarkers();
+ feed.append(frag);
+ try { drawMarkers(); } catch(e) { console.error('Alert marker error',e); mapState.hidden=false;mapState.textContent='마커 표시 오류: '+e.message; }
+}
+function locationPoints(a){
+ const loc=a.Locations;
+ const arr=Array.isArray(loc)?loc:(Array.isArray(loc?.features)?loc.features:[]);
+ return arr.map(f=>{
+   const c=f?.geometry?.coordinates;
+   return {lat:Number(f.lat??(Array.isArray(c)?c[1]:NaN)),lng:Number(f.lng??(Array.isArray(c)?c[0]:NaN)),name:f.name||f.properties?.Name||'',primary:!!(f.primary??f.properties?.IsPrimary)};
+ }).filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lng)&&Math.abs(p.lat)<=90&&Math.abs(p.lng)<=180);
+}
+function alertPopup(title,items){
+ const panel=document.createElement('div');panel.className='popup';
+ const h=document.createElement('b');h.textContent=title+' · '+items.length+' Alert';panel.append(h);
+ for(const a of items){const b=document.createElement('button');b.textContent=`${new Date(a.Date||a.CreatedDate||0).toLocaleDateString('ko-KR')} · ${plain(a.Heading)||a.Title||'Alert'}`;b.onclick=()=>{map.closePopup();openAlert(a);};panel.append(b);}
+ return panel;
 }
 function drawMarkers(){
- layer.clearLayers();const byCode=new Map(),coords=new Map();
- for(const a of airports){const c=String(a.ICAO||'').trim().toUpperCase();const lat=Number(a.Lat),lng=Number(a.Lng);if(c&&Number.isFinite(lat)&&Number.isFinite(lng)&&Math.abs(lat)<=90&&Math.abs(lng)<=180)coords.set(c,[lat,lng]);}
- for(const a of filtered){for(const raw of (Array.isArray(a.AffectedAirports)?a.AffectedAirports:[])){
- const code=String(raw).toUpperCase().trim();if(!coords.has(code))continue;if(!byCode.has(code))byCode.set(code,[]);byCode.get(code).push(a);
- }}
- for(const [code,items] of byCode){const icon=L.divIcon({className:'',html:`<span class="icaoIcon">${esc(code)}${items.length>1?`<b>${items.length}</b>`:''}</span>`,iconSize:[75,26],iconAnchor:[37,13]});
- const marker=L.marker(coords.get(code),{icon}).addTo(layer);
- const panel=document.createElement('div');panel.className='popup';const h=document.createElement('b');h.textContent=`${code} · ${items.length} Alert`;panel.append(h);
- for(const a of items){const b=document.createElement('button');b.textContent=`${new Date(a.Date||0).toLocaleDateString('ko-KR')} · ${plain(a.Heading)||a.Title}`;b.onclick=()=>{map.closePopup();openAlert(a);};panel.append(b);}
- marker.bindPopup(panel,{maxWidth:360});
- }
- // SOS locations have GeoJSON point coordinates; group coincident locations.
- const byPoint=new Map();
+ layer.clearLayers();
+ const coords=new Map(),byCode=new Map(),byPoint=new Map();
+ for(const ap of airports){const code=String(ap.ICAO||'').trim().toUpperCase(),lat=Number(ap.Lat),lng=Number(ap.Lng);if(code&&Number.isFinite(lat)&&Number.isFinite(lng)&&Math.abs(lat)<=90&&Math.abs(lng)<=180)coords.set(code,[lat,lng]);}
  for(const a of filtered){
-   if(a.Source!=='International SOS')continue;
-   for(const p of (a.Locations||[])){
+   const codes=Array.isArray(a.AffectedAirports)?a.AffectedAirports:[];
+   for(const raw of codes){const code=String(raw).trim().toUpperCase();if(!coords.has(code))continue;if(!byCode.has(code))byCode.set(code,[]);byCode.get(code).push(a);}
+   for(const p of locationPoints(a)){
+     // An SOS story already tied to an ICAO airport should not create a duplicate point marker next to the airport.
+     if(codes.some(c=>{const xy=coords.get(String(c).trim().toUpperCase());return xy&&Math.abs(xy[0]-p.lat)<0.08&&Math.abs(xy[1]-p.lng)<0.08;}))continue;
      const key=p.lat.toFixed(4)+','+p.lng.toFixed(4);
      if(!byPoint.has(key))byPoint.set(key,{p,items:[]});
      byPoint.get(key).items.push(a);
    }
  }
- for(const {p,items} of byPoint.values()){
-   const marker=L.circleMarker([p.lat,p.lng],{radius:items.length>1?9:6,color:'#fbc16b',fillColor:'#ec833d',weight:2,fillOpacity:.9}).addTo(layer);
-   const panel=document.createElement('div');panel.className='popup';
-   const h=document.createElement('b');h.textContent=(p.name||'Location')+' · '+items.length+' Alert';panel.append(h);
-   for(const a of items){const bt=document.createElement('button');bt.textContent=a.Title;bt.onclick=()=>{map.closePopup();openAlert(a);};panel.append(bt);}
-   marker.bindPopup(panel,{maxWidth:360});
+ let markers=0;
+ for(const [code,items] of byCode){
+   const icon=L.divIcon({className:'',html:`<span class="icaoIcon">${esc(code)}${items.length>1?`<b>${items.length}</b>`:''}</span>`,iconSize:[76,26],iconAnchor:[38,13]});
+   L.marker(coords.get(code),{icon,pane:'alertMarkers',keyboard:true}).bindPopup(alertPopup(code,items),{maxWidth:360}).addTo(layer);markers++;
  }
+ for(const {p,items} of byPoint.values()){
+   const label=items.length>1?String(items.length):'●';
+   const icon=L.divIcon({className:'',html:`<span class="sosPin" title="${esc(p.name||'Alert location')}">${esc(label)}</span>`,iconSize:[28,28],iconAnchor:[14,14]});
+   L.marker([p.lat,p.lng],{icon,pane:'alertMarkers',keyboard:true}).bindPopup(alertPopup(p.name||'Alert location',items),{maxWidth:360}).addTo(layer);markers++;
+ }
+ if(!markers&&filtered.length){mapState.textContent='표시할 위치 정보가 없습니다';mapState.hidden=false;}
+ else mapState.hidden=true;
 }
+
 function openAlert(a){activeId=a.Id??a.NodeId;const codes=(a.AffectedAirports||[]).map(String),name=plain(a.Heading)||a.Title||'Alert';
  $('details').innerHTML=`<div class="time">${esc(a.Date?new Date(a.Date).toLocaleString('ko-KR',{hour12:false}):'')} · ${esc(a.SelectedCountry||'')}</div><h2>${esc(name)}</h2><p><b>Source:</b> ${esc(a.Source||'Aviation')}<br><b>Severity:</b> ${esc(a.Severity||'–')}<br><b>Status:</b> ${esc(a.AlertStatus||'–')}<br><b>ICAO:</b> ${esc(codes.join(', ')||'–')}<br><b>Category:</b> ${esc((a.Categories||[]).join(', '))}</p><div class="detailtext" id="bodyText"></div>`;
  const sections=[['Summary',a.Summary||a.Blocks],['Traveller advice',a.TravellerAdvice],['More detail',a.MoreDetail]];
@@ -110,7 +125,7 @@ function openAlert(a){activeId=a.Id??a.NodeId;const codes=(a.AffectedAirports||[
  for(const [label,html] of sections){if(!html)continue;const h=document.createElement('h3');h.textContent=label;const body=document.createElement('div');body.textContent=plain(html);body.style.whiteSpace='pre-line';dest.append(h,body);}
  if(!dest.childNodes.length)dest.textContent='상세 내용 없음';
  $('modal').classList.add('open');
- const p=(a.Locations||[]).find(x=>x.primary)||(a.Locations||[])[0];
+ const points=locationPoints(a);const p=points.find(x=>x.primary)||points[0];
  const found=airports.find(x=>codes.includes(String(x.ICAO||'').toUpperCase())&&Number.isFinite(Number(x.Lat))&&Number.isFinite(Number(x.Lng)));
  if(found)map.setView([Number(found.Lat),Number(found.Lng)],Math.max(map.getZoom(),6));
  else if(p)map.setView([p.lat,p.lng],Math.max(map.getZoom(),5));
