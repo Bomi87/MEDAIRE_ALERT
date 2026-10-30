@@ -14,21 +14,27 @@
 const $=id=>document.getElementById(id);
 
 const map=L.map('map',{worldCopyJump:true}).setView([27,20],2);
-let tileLayer, tileFailures=0, fallbackUsed=false;
-const BASEMAPS=[
-  {url:'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',attribution:'&copy; OpenStreetMap &copy; CARTO'},
-  {url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',attribution:'&copy; OpenStreetMap contributors'}
-];
-function loadTiles(index){
-  if(tileLayer)map.removeLayer(tileLayer);
-  tileFailures=0;
-  tileLayer=L.tileLayer(BASEMAPS[index].url,{attribution:BASEMAPS[index].attribution,maxZoom:19,keepBuffer:1,updateWhenIdle:true,updateWhenZooming:false,crossOrigin:true});
-  tileLayer.on('loading',()=>{ $('mapstate').textContent='지도 로딩 중…';$('mapstate').hidden=false;});
-  tileLayer.on('load',()=>{ $('mapstate').hidden=true; });
-  tileLayer.on('tileerror',()=>{tileFailures++;if(tileFailures>=4&&!fallbackUsed){fallbackUsed=true;loadTiles(1);$('mapstate').textContent='지도 서버 전환 중…';}else if(tileFailures>=4){$('mapstate').textContent='지도 타일 연결 오류 · 네트워크 확인';$('mapstate').hidden=false;}});
-  tileLayer.addTo(map);
+// OpenStreetMap standard tiles. No CARTO API key, no repeated provider switching.
+const mapState=$('mapstate');
+let tilePending=0, tileErrors=0, tileReady=false, tileWatchdog=null;
+const tileLayer=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>',
+  maxZoom:19,keepBuffer:1,updateWhenIdle:true,updateWhenZooming:false,
+  crossOrigin:true
+});
+function mapMessage(message){mapState.textContent=message;mapState.hidden=!message;}
+function armMapWatchdog(){
+  clearTimeout(tileWatchdog);
+  tileWatchdog=setTimeout(()=>{
+    if(!tileReady && tilePending>0) mapMessage('지도 응답이 지연되고 있습니다. 네트워크/지도 서버 연결 확인');
+    else if(tileErrors) mapMessage('지도 일부 로딩 실패 ('+tileErrors+'개 타일) · 네트워크 확인');
+  },9000);
 }
-loadTiles(0);
+tileLayer.on('loading',()=>{tilePending++;if(!tileReady)mapMessage('지도 불러오는 중…');armMapWatchdog();});
+tileLayer.on('tileload',()=>{tileReady=true;if(tileErrors===0)mapMessage('');});
+tileLayer.on('tileerror',()=>{tileErrors++;mapMessage('지도 타일 일부 오류 · 연결 상태 확인 ('+tileErrors+')');});
+tileLayer.on('load',()=>{tilePending=0;clearTimeout(tileWatchdog);mapMessage(tileErrors?'지도 타일 일부 오류 ('+tileErrors+')':'');});
+tileLayer.addTo(map);
 let alerts=[], airports=[], filtered=[], activeId=null;const layer=L.layerGroup().addTo(map);
 const esc=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const plain=s=>{const tmp=document.createElement('template');tmp.innerHTML=String(s??'');return (tmp.content.textContent||'').trim();};
@@ -42,11 +48,15 @@ function ingest(data){
  if(ap && (ap.length===0 || ap[0]?.ICAO!==undefined)){airports=ap;}
  if(!arr && !ap)throw Error('Alert/공항 JSON 배열을 찾지 못했습니다.');
  alerts=[...alerts].sort((a,b)=>sortDate(b)-sortDate(a));
- const newest=alerts[0]?.Date ? new Date(alerts[0].Date).toLocaleString('ko-KR',{hour12:false}) : '없음';
- $('status').textContent=`Alert ${alerts.length.toLocaleString()}건 / 공항 ${airports.length.toLocaleString()}곳 · 최신 ${newest}`;
+ const serverAt=data?.updatedAt ? new Date(data.updatedAt) : null;
+ const newest=alerts[0]?.Date ? new Date(alerts[0].Date) : null;
+ const stamp=d=>(d&&Number.isFinite(d.getTime()))?d.toLocaleString('ko-KR',{timeZone:'Asia/Seoul',hour12:false}):'확인 불가';
+ $('status').textContent=`Alert ${alerts.length.toLocaleString()}건 / 공항 ${airports.length.toLocaleString()}곳 · 서버 갱신 ${stamp(serverAt)} · 최신 기사 ${stamp(newest)}`;
  if(data?.windowStats){const failed=data.windowStats.filter(x=>x.error);if(failed.length) $('status').textContent+=' · 일부 데이터 소스 오류';}
  
  rebuildOptions();render();
+ // After a successful server load, show newest items first, even if previously scrolled.
+ $('feed').scrollTop=0;
 }
 function rebuildOptions(){
  const choices=[['country',a=>a.SelectedCountry||a.TitleLocation||a.CountriesAffected?.[0]?.Name],['severity',a=>a.Severity],['category',a=>a.Categories||[]]];
