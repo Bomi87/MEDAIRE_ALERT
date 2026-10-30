@@ -10,7 +10,7 @@
 .alert-map-point{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;background:transparent;border:0;padding:0;margin:0;cursor:pointer;white-space:nowrap;line-height:1}
 .alert-map-point:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:5px}
 .alert-map-point .icaoIcon,.alert-map-point .sosPin{display:inline-flex;align-items:center;justify-content:center}
-.popup-group{font-size:12px;font-weight:750;color:#ffc27d;background:#24364d;padding:7px 6px;margin-top:10px;border-radius:5px}.popup-empty{padding:9px 3px;color:#99afc7;font-size:12px}</style></head>
+.group-reset{margin-left:auto;flex-shrink:0;background:#294566;border:1px solid #6082a6;color:#fff;border-radius:5px;padding:4px 9px;font-size:12px}.count:has(.group-reset){display:flex;align-items:center;gap:8px;justify-content:space-between}.feed-group-heading{position:sticky;top:0;z-index:2;padding:10px 12px;background:#243b54;color:#ffd18f;border-bottom:1px solid #6d84a0;font-weight:750;font-size:12px}.popup-group{font-size:12px;font-weight:750;color:#ffc27d;background:#24364d;padding:7px 6px;margin-top:10px;border-radius:5px}.popup-empty{padding:9px 3px;color:#99afc7;font-size:12px}</style></head>
 <body><header class="top"><h1>✈ MedAire Alert Monitor</h1><span id="status" class="status">데이터를 불러오세요</span><div class="connect"><input id="backend" value="https://script.google.com/macros/s/AKfycbzHiJfw__LOpkZSwx_i0KU3YgCXSxQMocrm175qTbpsus5Ze7VPSnub2rvtpUBexQNQ-Q/exec" placeholder="Apps Script /exec URL" aria-label="백엔드 URL"><button class="btn" id="loadRemote">서버 조회</button><label class="btn fileBtn">JSON 불러오기<input class="hide" type="file" id="fileInput" accept=".json,.txt,application/json" multiple></label></div></header>
 <div class="shell"><section class="side"><div class="controls"><input id="query" placeholder="국가, 공항 ICAO, 내용 검색"><select id="country"><option value="">모든 국가</option></select><select id="severity"><option value="">모든 심각도</option></select><select id="category"><option value="">모든 카테고리</option></select><select id="period"><option value="0">전체 기간</option><option value="1">최근 24시간</option><option value="7">최근 7일</option><option value="30" selected>최근 30일</option></select></div><div class="count" id="count">Alert 0건</div><div class="feed" id="feed"><div class="notice">서버에서 Alert를 자동 조회합니다.</div></div><div class="foot">최신 발행 Alert가 항상 맨 위 · 지도에는 ICAO 공항 및 위치 좌표 표시</div></section><div class="mapwrap"><div id="map"></div><div id="alert-overlay" aria-label="Alert 지도 위치"></div><div id="mapstate" role="status">지도 준비 중…</div></div></div>
 <div class="modal" id="modal"><div class="modalbody"><button class="btn close" id="close">닫기 ✕</button><div id="details"></div></div></div>
@@ -29,6 +29,7 @@ L.polyline(countryLines.map(line=>line.map(([lng,lat])=>[lat,lng])),{renderer:ba
 const mapState=$('mapstate');
 mapState.hidden=true;
 let alerts=[], airports=[], filtered=[], activeId=null;
+let selectedMarkerGroup=null;
 map.createPane('alertMarkers');map.getPane('alertMarkers').style.zIndex='650';
 const layer=L.layerGroup().addTo(map);
 const esc=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -70,14 +71,39 @@ function render(){
   return true;
  });
  filtered.sort((a,b)=>sortDate(b)-sortDate(a));
- $('count').textContent=`Alert ${filtered.length.toLocaleString()}건 · 발행 시각 기준 최신순`;
+ let displayGroups=null;
+ if(selectedMarkerGroup){
+   const present=new Set(filtered.map(articleKey));
+   const same=selectedMarkerGroup.items.filter(a=>present.has(articleKey(a)));
+   const matchingCountries=selectedMarkerGroup.countries;
+   const sameIds=new Set(same.map(articleKey));
+   const rest=filtered.filter(a=>!sameIds.has(articleKey(a)) && matchesCountry(a,matchingCountries));
+   displayGroups=[['해당 위치 / 공항 Alert',same],['동일 국가의 다른 Alert',rest]];
+ }
+ $('count').replaceChildren();
+ if(selectedMarkerGroup){
+   const label=document.createElement('span');
+   label.textContent=selectedMarkerGroup.label+' · '+(displayGroups[0][1].length+displayGroups[1][1].length)+'건 · 최신순';
+   const reset=document.createElement('button');reset.type='button';reset.textContent='전체 목록';reset.className='group-reset';
+   reset.onclick=()=>{selectedMarkerGroup=null;render();$('feed').scrollTop=0;};
+   $('count').append(label,reset);
+ } else $('count').textContent=`Alert ${filtered.length.toLocaleString()}건 · 발행 시각 기준 최신순`;
  const feed=$('feed');feed.replaceChildren();
  if(!filtered.length){feed.innerHTML='<div class="notice">조건에 맞는 Alert가 없습니다.</div>';}
  const frag=document.createDocumentFragment();
- for(const a of filtered){const d=document.createElement('div');d.className='alert'+(String(a.Id??a.NodeId)===String(activeId)?' active':'');
+ function appendArticles(records){
+ for(const a of records){const d=document.createElement('div');d.className='alert'+(String(a.Id??a.NodeId)===String(activeId)?' active':'');
  const date=(a.Date||a.CreatedDate)?new Date(a.Date||a.CreatedDate).toLocaleString('ko-KR',{hour12:false}):'시간 미상';
  d.innerHTML=`<div class="time">${esc(date)} · ${esc(a.SelectedCountry||a.TitleLocation||'')}</div><div class="heading">${esc(plain(a.Heading)||a.Title||'Alert')}</div><div class="meta"><span class="tag sev">${esc(a.Severity||'')}</span><span class="tag">${esc(a.Source||'Aviation')}</span>${(a.AffectedAirports||[]).map(c=>`<span class="tag">${esc(c)}</span>`).join('')}${(a.Categories||[]).slice(0,3).map(c=>`<span class="tag">${esc(c)}</span>`).join('')}</div>`;
  d.onclick=()=>openAlert(a);frag.append(d);}
+ }
+ if(displayGroups){
+   for(const [name,records] of displayGroups){
+     const header=document.createElement('div');header.className='feed-group-heading';header.textContent=name+' ('+records.length+')';frag.append(header);
+     if(records.length)appendArticles(records);
+     else {const empty=document.createElement('div');empty.className='notice';empty.textContent='해당하는 기사가 없습니다.';frag.append(empty);}
+   }
+ } else appendArticles(filtered);
  feed.append(frag);
  try { drawMarkers(); } catch(e) { console.error('Alert marker error',e); mapState.hidden=false;mapState.textContent='마커 표시 오류: '+e.message; }
 }
@@ -92,6 +118,17 @@ function locationPoints(a){
 function countryOf(a){
  return String(a.SelectedCountry||a.TitleLocation||a.CountriesAffected?.[0]?.Name||'').trim();
 }
+function countryParts(value){return String(value||'').split(/[,;/]+/).map(x=>x.trim().toLowerCase()).filter(Boolean);}
+function matchesCountry(a,countries){return countryParts(countryOf(a)).some(c=>countries.has(c));}
+function selectMarkerArticles(label,items,coords,code){
+ const unique=[...new Map(items.map(a=>[articleKey(a),a])).values()];
+ const countries=new Set(unique.flatMap(a=>countryParts(countryOf(a))));
+ if(code){for(const ap of airports){if(String(ap.ICAO||'').trim().toUpperCase()===label.trim().toUpperCase()) for(const c of countryParts(ap.Country))countries.add(c);}}
+ selectedMarkerGroup={label,items:unique,countries};
+ render();
+ $('feed').scrollTop=0;
+}
+
 function articleKey(a){return String(a.Id??a.NodeId??(a.Title||a.Heading||'')+'|'+(a.Date||a.CreatedDate||''));}
 function alertPopup(title,items){
  const panel=document.createElement('div');panel.className='popup';
@@ -168,7 +205,9 @@ function drawMarkers(){
     btn.append(span);
     btn.addEventListener('click',e=>{
       e.preventDefault();e.stopPropagation();
-      L.popup({maxWidth:430,maxHeight:450}).setLatLng(coords).setContent(alertPopup(label,items)).openOn(map);
+      selectMarkerArticles(label,items,coords,!!code);
+      // The left panel becomes the main list; no popup obscures the map.
+      map.closePopup();
     });
     alertOverlay.append(btn);
     overlayRecords.push({el:btn,coords});
@@ -194,7 +233,7 @@ function openAlert(a){activeId=a.Id??a.NodeId;const codes=(a.AffectedAirports||[
 }
 $('close').onclick=()=>$('modal').classList.remove('open');$('modal').onclick=e=>{if(e.target===$('modal'))$('modal').classList.remove('open');};
 let searchTimer;
-for(const id of ['query','country','severity','category','period'])$(id).addEventListener(id==='query'?'input':'change',()=>{if(id==='query'){clearTimeout(searchTimer);searchTimer=setTimeout(render,140);}else render();});
+for(const id of ['query','country','severity','category','period'])$(id).addEventListener(id==='query'?'input':'change',()=>{selectedMarkerGroup=null;if(id==='query'){clearTimeout(searchTimer);searchTimer=setTimeout(render,140);}else render();});
 $('fileInput').addEventListener('change',async e=>{for(const file of e.target.files){try{ingest(JSON.parse(await file.text()));}catch(err){alert(file.name+': '+err.message);}}e.target.value='';});
 // JSONP avoids GAS cross-origin redirect limitations. No credentials are sent from the browser.
 let syncing=false;
