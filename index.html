@@ -204,7 +204,7 @@ const $=id=>document.getElementById(id);
 
 // Offline vector world map. Three longitudinal copies maintain a continuous
 // basemap across the international date line without network tile requests.
-const map=L.map('map',{worldCopyJump:true,preferCanvas:true,zoomControl:true,zoomSnap:0.5,minZoom:1,maxZoom:13}).setView([24,18],2);
+const map=L.map('map',{worldCopyJump:true,preferCanvas:true,zoomControl:true,zoomSnap:0.5,minZoom:1,maxZoom:13}).setView([15,20],2);
 
 // Manual ICAO lookup. FAA app's NDB reference KML is a GitHub Pages static file;
 // no MedAire API calls or additional GAS deployment are required.
@@ -1184,10 +1184,19 @@ window.startProtectedApp=function(){
  if(!window.CURRENT_PORTAL_USER)return;
  medaireStartedAfterAuth=true;
  requestAnimationFrame(()=>{
-  map.invalidateSize({pan:false});
+  // Leaflet was constructed while #appRoot was hidden (zero-sized map).
+  // Recompute the visible size and reset the initial center before fetching alerts.
+  map.invalidateSize({pan:false,animate:false});
+  map.setView([15,20],2,{animate:false});
   if(typeof requestFlightDraw==='function')requestFlightDraw();
   if(typeof scheduleManualIcaoMarker==='function')scheduleManualIcaoMarker();
-  sync();
+  // The following frame ensures all overlays use the actual visible dimensions.
+  requestAnimationFrame(()=>{
+   map.invalidateSize({pan:false,animate:false});
+   map.setView([15,20],2,{animate:false});
+   if(typeof requestFlightDraw==='function')requestFlightDraw();
+   sync();
+  });
  });
 };
 // Safe fallback for a valid cached portal user when the approval event raced the app script.
