@@ -89,6 +89,13 @@
 .flight-wp-dot{display:block}
 .flight-wp-name{position:absolute;left:16px;top:6px;transform-origin:left center;pointer-events:none;display:inline-block;white-space:nowrap;will-change:transform}
 .flight-wp-item:hover .flight-wp-dot,.flight-wp-item:focus-visible .flight-wp-dot{outline:3px solid #fff9a6;outline-offset:2px}
+
+/* Label-only Flight Map styling. Preserve the original circular waypoint pins. */
+#flight-waypoint-overlay .flight-wp-item{width:13px!important;height:13px!important;transform:translate(-50%,-50%)!important;overflow:visible!important;display:block!important;z-index:1}
+#flight-waypoint-overlay .flight-wp-dot{display:block;width:13px;height:13px;border-radius:50%;border:2px solid #f4f7fc;box-shadow:0 0 0 1px #142538,0 1px 6px #000b}
+#flight-waypoint-overlay .flight-wp-name{position:absolute;left:16px;top:6px;transform-origin:left center;white-space:nowrap;padding:2px 4px;border:1px solid;border-radius:4px;font-weight:750;font-size:10px;line-height:1.3;box-shadow:0 1px 3px #0005;pointer-events:none}
+#flight-waypoint-overlay .flight-wp-item:hover .flight-wp-dot,#flight-waypoint-overlay .flight-wp-item:focus-visible .flight-wp-dot{outline:3px solid #fff9a6;outline-offset:2px}
+
 /* ROUTES v2: make top controls visible even on narrow desktops and mobile */
 .top{display:flex!important;align-items:center;min-height:51px;gap:8px}
 .top .connect{display:flex!important;visibility:visible!important;opacity:1!important;align-items:center;flex:0 0 auto;margin-left:auto;gap:7px;position:relative;z-index:20}
@@ -144,14 +151,14 @@
 @media(max-width:760px){.manual-icao{right:9px;bottom:9px;padding:4px;gap:4px}.manual-icao input{width:73px;height:32px}.manual-icao button{height:32px;padding:0 8px}.manual-icao-status{right:9px;bottom:55px}}
 
 /* Enlarged MedAire header only: branding and three actions */
-.route-top-v3{min-height:96px!important;padding:12px 20px!important;gap:16px!important}
+.route-top-v3{min-height:84px!important;padding:7px 20px!important;gap:16px!important}
 .route-title-v3 h1{font-size:25px!important;font-weight:750!important;gap:15px!important;line-height:1.2}
 .route-title-v3 .medaire-brand-logo{width:68px;height:68px}
 .route-actions-v3{gap:10px!important}
 .route-actions-v3 button{min-height:42px!important;padding:10px 17px!important;font-size:14px!important;font-weight:750!important;border-radius:8px!important}
-.shell{height:calc(100vh - 96px)}
+.shell{height:calc(100vh - 84px)}
 @media(max-width:760px){
- .route-top-v3{min-height:80px!important;padding:9px 11px!important;gap:8px!important}
+ .route-top-v3{min-height:72px!important;padding:6px 11px!important;gap:8px!important}
  .route-title-v3 h1{font-size:19px!important;gap:10px!important}
  .route-title-v3 .medaire-brand-logo{width:50px;height:50px}
  .route-actions-v3{gap:6px!important;width:100%}
@@ -919,10 +926,15 @@ function drawFlightRoutes(){
     if(shown.has(id))continue;shown.add(id);
     const pin=document.createElement('button');pin.type='button';pin.className='flight-wp-item';
     pin.style.left=pt.x+'px';pin.style.top=pt.y+'px';pin.title=tail+' · '+wp.name;
-    const dot=document.createElement('span');dot.className='flight-wp-dot';dot.style.background=cfg.color;pin.append(dot);
+    // Preserve the original circular waypoint marker; only the label is restyled.
+    const dot=document.createElement('span');dot.className='flight-wp-dot';dot.style.background=cfg.color;
+    pin.append(dot);
     if(map.getZoom()>=4){
      const label=document.createElement('span');label.className='flight-wp-name';
-     label.style.borderColor=cfg.color;label.textContent=wp.name;
+     label.style.borderColor=cfg.color;
+     label.style.color=tail==='HL8080'?'#a96600':'#527f12';
+     label.style.backgroundColor=tail==='HL8080'?'#fff8e6':'#f3ffe6';
+     label.textContent=wp.name;
      // Rotating a horizontal label around its left edge keeps it next to the waypoint.
      const angle=flightWaypointLabelAngle(pt,cfg.paths,shift,w,h);
      label.style.transform='rotate('+angle+'deg)';
@@ -971,20 +983,10 @@ async function toggleFlightRoute(tail){
    for(const pt of path)routeBounds.push(pt);
    svgPaths.push(path);
   }
-  // Draw all waypoint pins; names appear only at closer zoom levels.
-  const icon=flightWaypointIcon(cfg.color),labels=[];
-  for(const wp of waypoints){
-   routeBounds.push(wp.pos);
-   for(const shift of [-360,0,360]){
-    const ll=[wp.pos[0],wp.pos[1]+shift];
-    const marker=L.marker(ll,{pane:'medaireFlightWaypoint',icon,zIndexOffset:0}).addTo(layer);
-    const safeName=document.createElement('div');safeName.textContent=tail+' · '+wp.name;
-    if(wp.desc){const desc=document.createElement('div');desc.textContent=new DOMParser().parseFromString(wp.desc,'text/html').body.textContent||'';desc.style.whiteSpace='pre-line';safeName.append(desc);}
-    marker.bindPopup(safeName,{maxWidth:320});
-    const label=L.marker(ll,{pane:'medaireFlightWaypoint',interactive:false,keyboard:false,zIndexOffset:0,icon:L.divIcon({className:'',iconSize:[0,0],iconAnchor:[-9,-4],html:'<span class="flight-route-label" style="border-color:'+cfg.color+'">'+escapeFlightLabel(wp.name)+'</span>'})}).addTo(layer);
-    labels.push(label);
-   }
-  }
+  // The single HTML overlay renders all clickable waypoint pins/labels.
+  // Avoid duplicates from the older Leaflet pane (which obscured the new pin design).
+  const labels=[];
+  for(const wp of waypoints)routeBounds.push(wp.pos);
   layer.addTo(map);cfg.layer=layer;cfg.labels=labels;cfg.paths=svgPaths;cfg.waypoints=waypoints;
   button.setAttribute('aria-pressed','true');
   updateFlightLabels();
