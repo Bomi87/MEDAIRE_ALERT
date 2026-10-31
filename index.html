@@ -223,62 +223,81 @@ function parseManualIcaoKml(xmlText){
  }
  return items;
 }
+// Independent worldwide airport coordinates, no Nominatim calls or GAS geocoder quota.
+// OurAirports publishes a daily public-domain CSV; a shared CDN handles simultaneous users.
+const ICAO_AIRPORT_CSV_URLS=[
+ 'https://davidmegginson.github.io/ourairports-data/airports.csv',
+ 'https://cdn.jsdelivr.net/gh/davidmegginson/ourairports-data@main/airports.csv'
+];
+let allIcaoAirportsPromise=null;
+function splitAirportCsvRow(line){
+ const cells=[];let value='',quoted=false;
+ for(let i=0;i<line.length;i++){
+  const ch=line[i];
+  if(ch==='"'){
+   if(quoted&&line[i+1]==='"'){value+='"';i++;}
+   else quoted=!quoted;
+  }else if(ch===','&&!quoted){cells.push(value);value='';}
+  else value+=ch;
+ }
+ cells.push(value);return cells;
+}
+async function getWorldwideIcaoAirports(){
+ if(allIcaoAirportsPromise)return allIcaoAirportsPromise;
+ allIcaoAirportsPromise=(async()=>{
+  let csv='',lastError=null;
+  for(const url of ICAO_AIRPORT_CSV_URLS){
+   try{
+    const res=await fetch(url,{mode:'cors',cache:'force-cache'});
+    if(!res.ok)throw Error('HTTP '+res.status);
+    csv=await res.text();
+    if(!csv.includes('latitude_deg')||!csv.includes('longitude_deg'))throw Error('공항 좌표 CSV 형식 오류');
+    break;
+   }catch(err){lastError=err;}
+  }
+  if(!csv)throw Error('전 세계 공항 좌표 자료를 불러올 수 없습니다: '+(lastError?.message||''));
+  const lines=csv.split(/\r?\n/),headers=splitAirportCsvRow(lines[0]);
+  const col=key=>headers.indexOf(key);
+  const ident=col('ident'),gps=col('gps_code'),latCol=col('latitude_deg'),lonCol=col('longitude_deg'),nameCol=col('name'),typeCol=col('type');
+  if(ident<0||latCol<0||lonCol<0)throw Error('공항 좌표 파일의 열 구성이 변경되었습니다.');
+  const airportsByIcao=new Map();
+  for(let i=1;i<lines.length;i++){
+   if(!lines[i])continue;
+   const row=splitAirportCsvRow(lines[i]);
+   if(row[typeCol]==='closed')continue;
+   const lat=Number(row[latCol]),lon=Number(row[lonCol]);
+   if(!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180)continue;
+   const codeGps=String(gps>=0?row[gps]||'':'').trim().toUpperCase();
+   const codeIdent=String(row[ident]||'').trim().toUpperCase();
+   const name=row[nameCol]||'';
+   const airport={lat,lon,name:name||codeGps||codeIdent};
+   // GPS code is the strongest indication of the real ICAO code.
+   if(/^[A-Z]{4}$/.test(codeGps))airportsByIcao.set(codeGps,{...airport,code:codeGps});
+   if(/^[A-Z]{4}$/.test(codeIdent)&&(!airportsByIcao.has(codeIdent)||codeIdent===codeGps))
+    airportsByIcao.set(codeIdent,{...airport,code:codeIdent});
+  }
+  return airportsByIcao;
+ })();
+ try{return await allIcaoAirportsPromise;}
+ catch(err){allIcaoAirportsPromise=null;throw err;}
+}
 async function lookupManualAirport(code){
- // Alert API already supplies coordinates for associated airports.
+ // 1) Coordinates already included with MedAire alerts.
  const known=(typeof airports!=='undefined'&&Array.isArray(airports))?airports.find(a=>String(a.ICAO||'').toUpperCase()===code):null;
  if(known&&Number.isFinite(Number(known.Lat))&&Number.isFinite(Number(known.Lng)))return {code,lat:Number(known.Lat),lon:Number(known.Lng),name:known.Name||code};
+ // 2) Existing NDB KML, if available. A KML failure must not abort airport lookup.
  if(!manualAirportsCache){
-  const response=await fetch(MANUAL_ICAO_KML,{mode:'cors',cache:'force-cache'});
-  if(!response.ok)throw Error('공항 KML HTTP '+response.status);
-  manualAirportsCache=parseManualIcaoKml(await response.text());
+  try{
+   const response=await fetch(MANUAL_ICAO_KML,{mode:'cors',cache:'force-cache'});
+   if(response.ok)manualAirportsCache=parseManualIcaoKml(await response.text());
+  }catch(_){/* Continue to worldwide airport data. */}
  }
- const inKml=manualAirportsCache.find(a=>a.code===code);
+ const inKml=manualAirportsCache?.find(a=>a.code===code);
  if(inKml)return inKml;
- return await geocodeIcaoFallback(code);
+ // 3) Dedicated global airport dataset instead of rate-limited Nominatim.
+ return (await getWorldwideIcaoAirports()).get(code)||null;
 }
-// Centralized GAS ICAO lookup: shared cross-user cache, lock and request pacing.
-// No browser calls to Nominatim; all users share a server-side quota.
-const ICAO_GEOCODE_CACHE_KEY='medaire_icao_geocode_v2';
-const icaoLookupInFlight=new Map();
-function icaoBackendJsonp(code){
- return new Promise((resolve,reject)=>{
-  const base=$('backend').value.trim();
-  if(!/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(base)){
-   reject(Error('MedAire GAS 주소를 확인해 주세요.'));return;
-  }
-  const callback='medaireIcaoCb'+Date.now()+Math.random().toString(36).slice(2);
-  const script=document.createElement('script');let completed=false;
-  const timeout=setTimeout(()=>finish(Error('공항 조회 응답 시간 초과')),45000);
-  function finish(err,response){if(completed)return;completed=true;clearTimeout(timeout);delete window[callback];script.remove();err?reject(err):resolve(response);}
-  window[callback]=payload=>finish(null,payload);
-  script.onerror=()=>finish(Error('공항 검색 서버 연결 오류'));
-  script.src=base+'?action=icao&code='+encodeURIComponent(code)+'&callback='+encodeURIComponent(callback);
-  document.head.append(script);
- });
-}
-async function geocodeIcaoFallback(code){
- const key=String(code||'').trim().toUpperCase();
- if(!/^[A-Z]{4}$/.test(key))return null;
- let cache={};
- try{cache=JSON.parse(localStorage.getItem(ICAO_GEOCODE_CACHE_KEY)||'{}')||{};}catch(_){}
- const entry=cache[key];
- if(entry&&Number.isFinite(entry.lat)&&Number.isFinite(entry.lon)&&Date.now()-Number(entry.savedAt||0)<30*86400000)
-  return {code:key,lat:entry.lat,lon:entry.lon,name:entry.name||key};
- if(icaoLookupInFlight.has(key))return icaoLookupInFlight.get(key);
- const pending=(async()=>{
-  const res=await icaoBackendJsonp(key);
-  if(!res||res.ok!==true)throw Error(res?.error||'공항 좌표 검색 실패');
-  if(!res.airport)return null;
-  const a=res.airport;
-  if(!Number.isFinite(Number(a.lat))||!Number.isFinite(Number(a.lon)))return null;
-  const found={code:key,lat:Number(a.lat),lon:Number(a.lon),name:String(a.name||key)};
-  cache[key]={...found,savedAt:Date.now()};
-  try{localStorage.setItem(ICAO_GEOCODE_CACHE_KEY,JSON.stringify(cache));}catch(_){}
-  return found;
- })();
- icaoLookupInFlight.set(key,pending);
- try{return await pending;}finally{icaoLookupInFlight.delete(key);}
-}
+
 let manualIcaoSearchSerial=0;
 $('manualIcaoForm').addEventListener('submit',async event=>{
  event.preventDefault();
