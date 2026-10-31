@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>MedAire Alert Monitor · ROUTES v4</title>
+<title>MedAire Alert Monitor · ROUTES v5</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoqVMy7MbVn8=" crossorigin="">
 <style>
 :root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#e8edf5;background:#0d1422;font-size:14px}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}.top{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 16px;border-bottom:1px solid #33435d;background:#152136}.top h1{font-size:17px;margin:0 12px 0 0;letter-spacing:.3px}.top small{color:#aabbd2}.shell{display:grid;grid-template-columns:minmax(480px,40%) minmax(0,1fr);height:calc(100vh - 70px);min-height:480px}.side{min-height:0;display:flex;flex-direction:column;border-right:1px solid #34445b}.controls{padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-bottom:1px solid #34445b}.controls input,.controls select,.connect input{min-width:0;width:100%;background:#202e43;border:1px solid #425671;border-radius:7px;padding:10px;color:#f2f6fb;font-size:16px}.query-combo{grid-column:span 2;position:relative;min-width:0}.controls #query{width:100%}.count{padding:9px 12px;color:#acbbd1;border-bottom:1px solid #314057}.feed{overflow:auto;flex:1}.alert{padding:13px;border-bottom:1px solid #2c3b51;cursor:pointer}.alert:hover,.alert.active{background:#20344c}.time{color:#91afd4;font-size:12px}.heading{font-weight:650;line-height:1.45;margin:6px 0}.meta{display:flex;gap:5px;flex-wrap:wrap;color:#aebdd2;font-size:12px}.tag{border:1px solid #4a5d78;border-radius:5px;padding:2px 5px}.sev{font-weight:800}.sev-danger{color:#ff646b;border-color:#a94b52;background:#5b222c55}.sev-warning{color:#ffbd68;border-color:#aa7835;background:#66401e55}.sev-success{color:#65d69c;border-color:#38865b;background:#204f3955}.mapwrap{position:relative;min-width:0;overflow:hidden}#mapstate{position:absolute;left:12px;top:12px;z-index:900;background:#101e30e8;border:1px solid #54708c;color:#e4f2ff;padding:8px 12px;border-radius:6px;font-size:12px;pointer-events:none}#mapstate[hidden]{display:none}#map{height:100%;width:100%;background:#203348}.connect{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-left:auto}.connect input{width:210px;font-size:13px;padding:8px}.btn{border:1px solid #456b99;background:#213c62;color:#edf5ff;border-radius:7px;padding:8px 10px}.btn:hover{background:#315788}.fileBtn{display:inline-flex;align-items:center}.foot{color:#b4c3d8;font-size:12px;padding:7px 12px;border-top:1px solid #34445b}.icaoIcon{background:#111e32;border:1px solid #d9e6ff;border-radius:6px;padding:3px 6px;color:#fff;font-weight:800;white-space:nowrap;font-size:12px;box-shadow:0 2px 9px #0009}.sosPin{display:flex;align-items:center;justify-content:center;width:21px;height:21px;border-radius:50%;border:2px solid #fff;background:#25ada8;color:#071b25;font-size:10px;font-weight:900;box-shadow:0 2px 8px #000b}.countryPin{display:inline-flex;align-items:center;justify-content:center;min-width:23px;height:23px;padding:0 4px;border-radius:5px;border:1.5px solid #e3eefd;background:#33749b;color:white;font-weight:800;font-size:10px;box-shadow:0 2px 7px #0009}.regionPin{display:inline-flex;align-items:center;justify-content:center;min-width:23px;height:23px;padding:0 4px;border-radius:5px;border:1.5px solid #f1dbff;background:#81539c;color:white;font-weight:800;font-size:10px;box-shadow:0 2px 7px #0009}.icaoIcon b{color:#ffca70;font-size:11px;margin-left:4px}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#172338;color:#ebf2ff}.popup{max-height:320px;overflow:auto;max-width:350px}.popup button{display:block;width:100%;border:0;border-bottom:1px solid #344660;background:none;text-align:left;color:#f0f5ff;padding:9px 2px}.popup button:hover{background:#2b3f5a}.notice{padding:12px;color:#bccbe0}.modal{position:fixed;inset:0;background:#000b;z-index:1200;display:none;align-items:center;justify-content:center;padding:12px}.modal.open{display:flex}.modalbody{background:#172439;border:1px solid #4c607b;border-radius:12px;max-width:650px;width:100%;max-height:80vh;overflow:auto;padding:18px;overflow-wrap:anywhere}.close{float:right}.detailtext{line-height:1.7}.detailtext p{margin:8px 0}.status{font-size:12px;color:#b8cee8}.hide{display:none}@media(max-width:760px){.shell{display:flex;flex-direction:column;height:auto}.side{height:48vh;min-height:360px;border-right:0}.mapwrap{height:47vh;min-height:280px;order:-1}.top{padding:9px}.top h1{width:100%}.connect{width:100%;margin:0}.connect input{flex:1;width:100px}.controls{padding:8px}.alert{padding:10px}}
@@ -90,7 +90,7 @@
 .top .status{min-width:0;flex:1 1 auto}
 @media(max-width:760px){.top{flex-wrap:wrap}.top h1{flex:1 1 auto;width:auto}.top .connect{order:2;margin-left:auto;width:auto}.top .status{order:3;flex:1 1 100%}.top .connect .btn{font-size:11px;padding:5px 7px}.top .connect #routeHL8080,.top .connect #routeHL8372{min-width:57px}}
 
-/* ROUTES v4 -- explicit standalone header controls (no legacy .connect dependency) */
+/* ROUTES v5 -- explicit standalone header controls (no legacy .connect dependency) */
 .route-top-v3{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;flex-wrap:wrap!important;padding:8px 12px!important;min-height:52px!important}
 .route-title-v3{display:flex;align-items:center;gap:14px;flex:1 1 390px;min-width:0;flex-wrap:wrap}
 .route-title-v3 h1{width:auto!important;margin:0!important;white-space:nowrap}
@@ -103,9 +103,12 @@
 .route-actions-v3 #routeHL8080[aria-pressed="true"]{background:#51421c;color:#ffe8a1}
 .route-actions-v3 #routeHL8372[aria-pressed="true"]{background:#304423;color:#d7ffa4}
 @media(max-width:760px){.route-top-v3{gap:6px!important}.route-title-v3{flex:1 1 100%;gap:5px}.route-actions-v3{width:100%;justify-content:flex-end!important}.route-actions-v3 button{font-size:11px;padding:5px 8px}}
+/* independent screen-space SVG draws lines above the vector basemap and below Alert markers */
+#flight-route-svg{position:absolute;inset:0;width:100%;height:100%;z-index:630;pointer-events:none;overflow:hidden}
+#flight-route-svg path{fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
 </style></head>
-<body><header class="top route-top-v3"><div class="route-title-v3"><h1>✈ MedAire Alert Monitor <span class="route-version-v3">ROUTES v4</span></h1><span id="status" class="status">데이터를 불러오세요</span></div><div class="route-actions-v3"><input type="hidden" id="backend" value="https://script.google.com/macros/s/AKfycbzHiJfw__LOpkZSwx_i0KU3YgCXSxQMocrm175qTbpsus5Ze7VPSnub2rvtpUBexQNQ-Q/exec"><button class="btn" id="loadRemote" type="button">서버 조회</button><button class="btn route-switch" id="routeHL8080" type="button" aria-pressed="false">HL8080</button><button class="btn route-switch" id="routeHL8372" type="button" aria-pressed="false">HL8372</button></div></header>
-<div class="shell"><section class="side"><div class="controls"><div class="query-combo"><input id="query" placeholder="국가, 공항 ICAO, 내용 검색" autocomplete="off" aria-autocomplete="list" aria-controls="countrySuggestions" aria-expanded="false"><div id="countrySuggestions" class="country-suggestions" role="listbox" hidden></div></div><select id="country"><option value="">모든 국가</option></select><select id="severity"><option value="">모든 심각도</option></select><select id="category"><option value="">모든 카테고리</option></select><select id="period"><option value="1">최근 24시간</option><option value="3" selected>최근 3일</option><option value="7">최근 7일</option><option value="14">최근 14일</option></select></div><div class="count" id="count">Alert 0건</div><div class="feed" id="feed"><div class="notice">서버에서 Alert를 자동 조회합니다.</div></div><div class="foot">· 최신 발행 Alert가 항상 맨 위<br>· 청록=특정 위치 / 파랑=특정 국가 / 보라=여러 국가 또는 넓은 지역</div></section><div class="mapwrap"><div id="map"></div><div id="alert-overlay" aria-label="Alert 위치 마커"></div><div id="mapstate" role="status">지도 준비 중…</div></div></div>
+<body><header class="top route-top-v3"><div class="route-title-v3"><h1>✈ MedAire Alert Monitor <span class="route-version-v3">ROUTES v5</span></h1><span id="status" class="status">데이터를 불러오세요</span></div><div class="route-actions-v3"><input type="hidden" id="backend" value="https://script.google.com/macros/s/AKfycbzHiJfw__LOpkZSwx_i0KU3YgCXSxQMocrm175qTbpsus5Ze7VPSnub2rvtpUBexQNQ-Q/exec"><button class="btn" id="loadRemote" type="button">서버 조회</button><button class="btn route-switch" id="routeHL8080" type="button" aria-pressed="false">HL8080</button><button class="btn route-switch" id="routeHL8372" type="button" aria-pressed="false">HL8372</button></div></header>
+<div class="shell"><section class="side"><div class="controls"><div class="query-combo"><input id="query" placeholder="국가, 공항 ICAO, 내용 검색" autocomplete="off" aria-autocomplete="list" aria-controls="countrySuggestions" aria-expanded="false"><div id="countrySuggestions" class="country-suggestions" role="listbox" hidden></div></div><select id="country"><option value="">모든 국가</option></select><select id="severity"><option value="">모든 심각도</option></select><select id="category"><option value="">모든 카테고리</option></select><select id="period"><option value="1">최근 24시간</option><option value="3" selected>최근 3일</option><option value="7">최근 7일</option><option value="30">최근 30일</option></select></div><div class="count" id="count">Alert 0건</div><div class="feed" id="feed"><div class="notice">서버에서 Alert를 자동 조회합니다.</div></div><div class="foot">· 최신 발행 Alert가 항상 맨 위<br>· 청록=특정 위치 / 파랑=특정 국가 / 보라=여러 국가 또는 넓은 지역</div></section><div class="mapwrap"><div id="map"></div><svg id="flight-route-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg><div id="alert-overlay" aria-label="Alert 위치 마커"></div><div id="mapstate" role="status">지도 준비 중…</div></div></div>
 <div class="modal" id="modal"><div class="modalbody"><button class="btn close" id="close" aria-label="닫기" title="닫기">×</button><div id="details"></div></div></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
@@ -666,14 +669,55 @@ function unwrapFlightPath(points){
   prev=lon;return [lat,lon];
  });
 }
-const routeSvgRenderer=L.svg({pane:'medaireFlightLine',padding:0.5});
+const flightSvg=document.getElementById('flight-route-svg');
+const FLIGHT_SVG_NS='http://www.w3.org/2000/svg';
+let flightDrawPending=false;
+function requestFlightDraw(){
+ if(flightDrawPending)return;
+ flightDrawPending=true;
+ requestAnimationFrame(()=>{flightDrawPending=false;drawFlightRoutes();});
+}
+function drawFlightRoutes(){
+ const w=flightSvg.clientWidth,h=flightSvg.clientHeight;
+ if(!w||!h)return;
+ flightSvg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+ flightSvg.replaceChildren();
+ for(const cfg of Object.values(flightRoutes)){
+  if(!cfg.layer||!cfg.paths)continue;
+  const pathEl=document.createElementNS(FLIGHT_SVG_NS,'path');
+  const segments=[];
+  for(const path of cfg.paths){
+   for(const shift of [-720,-360,0,360,720]){
+    let current=[];
+    const flush=()=>{if(current.length>=2)segments.push('M'+current.map(p=>p.join(',')).join(' L'));current=[];};
+    for(const [lat,lon] of path){
+     const pt=map.latLngToContainerPoint([lat,lon+shift]);
+     if(!Number.isFinite(pt.x)||!Number.isFinite(pt.y)){flush();continue;}
+     // Clip by subpath reset only far outside the viewport; avoids very long SVG strings.
+     if(Math.abs(pt.x)>w*3||Math.abs(pt.y)>h*3){flush();continue;}
+     current.push([pt.x.toFixed(1),pt.y.toFixed(1)]);
+    }
+    flush();
+   }
+  }
+  if(!segments.length)continue;
+  pathEl.setAttribute('d',segments.join(' '));
+  pathEl.setAttribute('stroke',cfg.color);
+  pathEl.setAttribute('stroke-width','4');
+  pathEl.setAttribute('stroke-opacity','1');
+  pathEl.style.filter='drop-shadow(0 0 2px #0b1723)';
+  flightSvg.appendChild(pathEl);
+ }
+}
+map.on('move zoom viewreset resize moveend zoomend',requestFlightDraw);
+window.addEventListener('resize',requestFlightDraw,{passive:true});
 function flightWaypointIcon(color){
  return L.divIcon({className:'',iconSize:[14,14],iconAnchor:[7,7],html:'<div class="flight-route-waypoint" style="background:'+color+'"></div>'});
 }
 async function toggleFlightRoute(tail){
  const cfg=flightRoutes[tail],button=$('route'+tail);
  if(!cfg||cfg.busy)return;
- if(cfg.layer){map.removeLayer(cfg.layer);cfg.layer=null;button.setAttribute('aria-pressed','false');return;}
+ if(cfg.layer){map.removeLayer(cfg.layer);cfg.layer=null;cfg.paths=null;requestFlightDraw();button.setAttribute('aria-pressed','false');return;}
  cfg.busy=true;button.disabled=true;button.textContent='로딩…';
  try{
   const response=await fetch(FLIGHT_ROUTE_BASE+tail+'.kml',{cache:'no-store',mode:'cors'});
@@ -681,12 +725,11 @@ async function toggleFlightRoute(tail){
   const {routes,waypoints}=flightKmlData(await response.text());
   const layer=L.layerGroup();
   const routeBounds=[];
+  const svgPaths=[];
   for(const original of routes){
    const path=unwrapFlightPath(original);
    for(const pt of path)routeBounds.push(pt);
-   for(const shift of [-360,0,360]){
-    L.polyline(path.map(([lat,lon])=>[lat,lon+shift]),{renderer:routeSvgRenderer,pane:'medaireFlightLine',color:cfg.color,weight:4,opacity:1,interactive:false,smoothFactor:0.5}).addTo(layer);
-   }
+   svgPaths.push(path);
   }
   // Draw all waypoint pins; names appear only at closer zoom levels.
   const icon=flightWaypointIcon(cfg.color),labels=[];
@@ -702,7 +745,7 @@ async function toggleFlightRoute(tail){
     labels.push(label);
    }
   }
-  layer.addTo(map);cfg.layer=layer;cfg.labels=labels;
+  layer.addTo(map);cfg.layer=layer;cfg.labels=labels;cfg.paths=svgPaths;
   button.setAttribute('aria-pressed','true');
   updateFlightLabels();
   // The previous implementation only added lines off-screen. Fit visible route on toggle.
@@ -711,6 +754,7 @@ async function toggleFlightRoute(tail){
    const normalized=routeBounds.map(([lat,lng])=>{let x=lng;while(x-center>180)x-=360;while(x-center< -180)x+=360;return [lat,x];});
    map.fitBounds(L.latLngBounds(normalized),{padding:[32,32],maxZoom:7,animate:false});
   }
+  requestFlightDraw();
   $('status').textContent=tail+' 경로 표시 · '+routes.length+'개 경로 · '+waypoints.length+'개 Waypoint';
  }catch(err){
    $('status').textContent=tail+' KML 오류: '+(err.message||err);
@@ -730,7 +774,7 @@ function updateFlightLabels(){
  }
 }
 map.on('zoomend',updateFlightLabels);
-if(!['loadRemote','routeHL8080','routeHL8372'].every(id=>document.getElementById(id))){throw new Error('ROUTES v4 header controls missing');}
+if(!['loadRemote','routeHL8080','routeHL8372'].every(id=>document.getElementById(id))){throw new Error('ROUTES v5 header controls missing');}
 $('routeHL8080').addEventListener('click',()=>toggleFlightRoute('HL8080'));
 $('routeHL8372').addEventListener('click',()=>toggleFlightRoute('HL8372'));
 
