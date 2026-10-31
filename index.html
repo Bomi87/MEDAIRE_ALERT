@@ -380,6 +380,8 @@ function ingest(data){
  if(data?.windowStats){const failed=data.windowStats.filter(x=>x.error);if(failed.length) $('status').textContent+=' · 일부 데이터 소스 오류';}
  
  rebuildOptions();render();
+ // Position the initial viewport around the currently filtered Alert locations.
+ if(!medaireInitialAlertViewDone&&!medaireMapTouchedByUser)fitInitialAlertView();
  // After a successful server load, show newest items first, even if previously scrolled.
  $('feed').scrollTop=0;
 }
@@ -714,6 +716,54 @@ function updateHighlightedMarkers(){
   if(match)r.el.style.zIndex='999';
   else r.el.style.zIndex=String({icao:40,local:30,region:20,country:10}[r.mode]);
  }
+}
+// Initial view: fit the actual geolocated Alert markers, not a fixed map center.
+// Recenter only once, after the first successful feed load. User interaction wins.
+let medaireInitialAlertViewDone=false;
+let medaireMapTouchedByUser=false;
+map.getContainer().addEventListener('pointerdown',()=>{medaireMapTouchedByUser=true;},{passive:true});
+map.getContainer().addEventListener('wheel',()=>{medaireMapTouchedByUser=true;},{passive:true});
+map.getContainer().addEventListener('keydown',()=>{medaireMapTouchedByUser=true;});
+function fitInitialAlertView(){
+ if(medaireInitialAlertViewDone||medaireMapTouchedByUser||!overlayRecords.length)return;
+ const unique=new Map();
+ for(const record of overlayRecords){
+  const lat=Number(record.coords[0]),lon=Number(record.coords[1]);
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90)continue;
+  const normalizedLon=((lon+180)%360+360)%360-180;
+  const key=lat.toFixed(4)+','+normalizedLon.toFixed(4);
+  if(!unique.has(key))unique.set(key,[lat,normalizedLon]);
+ }
+ const points=[...unique.values()];
+ if(!points.length)return;
+ medaireInitialAlertViewDone=true;
+ if(points.length===1){
+  map.setView(points[0],4,{animate:false});
+  return;
+ }
+ // Find the shortest longitude interval for a globe-spanning set of positions.
+ // This avoids centering on a longitude with no alerts around the date line.
+ const longs=points.map(p=>(p[1]+360)%360).sort((a,b)=>a-b);
+ let gap=-1,start=0;
+ for(let i=0;i<longs.length;i++){
+  const next=i===longs.length-1?longs[0]+360:longs[i+1];
+  const distance=next-longs[i];
+  if(distance>gap){gap=distance;start=next%360;}
+ }
+ const mapCenterLon=map.getCenter().lng;
+ const longitudes=points.map(p=>{
+  const east=((p[1]+360)%360-start+360)%360+start;
+  return east;
+ });
+ const lowLon=Math.min(...longitudes),highLon=Math.max(...longitudes);
+ const shift=360*Math.round((mapCenterLon-(lowLon+highLon)/2)/360);
+ const minLat=Math.min(...points.map(p=>p[0]));
+ const maxLat=Math.max(...points.map(p=>p[0]));
+ const bounds=L.latLngBounds([minLat,lowLon+shift],[maxLat,highLon+shift]);
+ const size=map.getSize();
+ const padding=Math.min(48,Math.max(16,Math.floor(Math.min(size.x,size.y)*.065)));
+ map.fitBounds(bounds,{padding:[padding,padding],maxZoom:5,animate:false});
+ schedulePositionMarkers();
 }
 // Markers are rendered in a dedicated screen overlay above the Canvas map.
 // Reproject on every move/zoom, including longitudinal copies at +/-360°.
