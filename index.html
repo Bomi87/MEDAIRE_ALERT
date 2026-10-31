@@ -47,9 +47,28 @@
 .country-option:last-child{border-bottom:0}.country-option:hover,.country-option.is-active{background:#365b7c}.country-option small{font-size:11px;color:#b9ccdf;white-space:nowrap}
 /* 상세 팝업에서 심각도는 테두리/배경 없이 글자색만 표시 */
 .modalbody .detail-severity{display:inline;border:0!important;background:transparent!important;padding:0!important;border-radius:0!important;box-shadow:none!important;font-weight:800}
+
+/* Reliable marker display above the offline vector canvas */
+#alert-overlay{position:absolute;inset:0;z-index:650;pointer-events:none;overflow:hidden}
+.alert-map-point{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;background:transparent;border:0;padding:0;margin:0;cursor:pointer;white-space:nowrap;line-height:1}
+.alert-map-point[hidden]{display:none!important}
+.alert-map-point:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:5px}
+.alert-map-point .icaoIcon,.alert-map-point .sosPin,.alert-map-point .countryPin,.alert-map-point .regionPin{display:inline-flex;align-items:center;justify-content:center}
+
+/* Collapsible country-first alert feed */
+.country-alert-group{border-bottom:1px solid #35465c}
+.country-alert-group>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:13px 15px;background:#192a41;cursor:pointer;font-weight:750;color:#eaf2ff;user-select:none}
+.country-alert-group>summary::-webkit-details-marker{display:none}
+.country-alert-group>summary:hover{background:#263d57}
+.country-alert-group>summary:before{content:'▸';color:#93c8ec;font-size:14px;transition:transform .15s}
+.country-alert-group[open]>summary:before{transform:rotate(90deg)}
+.country-alert-group .country-group-count{margin-left:auto;color:#b4c9df;background:#2b435f;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:650}
+.country-alert-group .country-latest{font-size:11px;color:#91abc8;font-weight:400}
+.country-alert-group>.alert{padding-left:22px}
+@media(max-width:760px){.country-alert-group>summary{padding:10px 11px}.country-alert-group>.alert{padding-left:14px}}
 </style></head>
 <body><header class="top"><h1>✈ MedAire Alert Monitor</h1><span id="status" class="status">데이터를 불러오세요</span><div class="connect"><input id="backend" value="https://script.google.com/macros/s/AKfycbzHiJfw__LOpkZSwx_i0KU3YgCXSxQMocrm175qTbpsus5Ze7VPSnub2rvtpUBexQNQ-Q/exec" placeholder="Apps Script /exec URL" aria-label="백엔드 URL"><button class="btn" id="loadRemote">서버 조회</button><label class="btn fileBtn">JSON 불러오기<input class="hide" type="file" id="fileInput" accept=".json,.txt,application/json" multiple></label></div></header>
-<div class="shell"><section class="side"><div class="controls"><div class="query-combo"><input id="query" placeholder="국가, 공항 ICAO, 내용 검색" autocomplete="off" aria-autocomplete="list" aria-controls="countrySuggestions" aria-expanded="false"><div id="countrySuggestions" class="country-suggestions" role="listbox" hidden></div></div><select id="country"><option value="">모든 국가</option></select><select id="severity"><option value="">모든 심각도</option></select><select id="category"><option value="">모든 카테고리</option></select><select id="period"><option value="1">최근 24시간</option><option value="3" selected>최근 3일</option><option value="7">최근 7일</option><option value="30">최근 30일</option></select></div><div class="count" id="count">Alert 0건</div><div class="feed" id="feed"><div class="notice">서버에서 Alert를 자동 조회합니다.</div></div><div class="foot">최신 발행 Alert가 항상 맨 위 · 지도: 공항 ICAO · 청록=특정 위치 · 파랑=국가 대표점 · 보라=광역 대표점</div></section><div class="mapwrap"><div id="map"></div><div id="mapstate" role="status">지도 준비 중…</div></div></div>
+<div class="shell"><section class="side"><div class="controls"><div class="query-combo"><input id="query" placeholder="국가, 공항 ICAO, 내용 검색" autocomplete="off" aria-autocomplete="list" aria-controls="countrySuggestions" aria-expanded="false"><div id="countrySuggestions" class="country-suggestions" role="listbox" hidden></div></div><select id="country"><option value="">모든 국가</option></select><select id="severity"><option value="">모든 심각도</option></select><select id="category"><option value="">모든 카테고리</option></select><select id="period"><option value="1">최근 24시간</option><option value="3" selected>최근 3일</option><option value="7">최근 7일</option><option value="30">최근 30일</option></select></div><div class="count" id="count">Alert 0건</div><div class="feed" id="feed"><div class="notice">서버에서 Alert를 자동 조회합니다.</div></div><div class="foot">최신 발행 Alert가 항상 맨 위 · 지도: 공항 ICAO · 청록=특정 위치 · 파랑=국가 대표점 · 보라=광역 대표점</div></section><div class="mapwrap"><div id="map"></div><div id="alert-overlay" aria-label="Alert 위치 마커"></div><div id="mapstate" role="status">지도 준비 중…</div></div></div>
 <div class="modal" id="modal"><div class="modalbody"><button class="btn close" id="close" aria-label="닫기" title="닫기">×</button><div id="details"></div></div></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
@@ -126,6 +145,28 @@ function searchableAlertText(a){
    ...(a.CountriesAffected||[]).map(c=>typeof c==='string'?c:(c.Name||''))
  ].join(' ').toLocaleLowerCase();
 }
+// Keep the country accordion state across filter changes and re-renders.
+const expandedAlertCountries=new Set();
+const KO_COUNTRY_LABELS=new Map(KO_COUNTRY_SEARCH.map(([ko,en])=>[en.toLowerCase(),ko]));
+// Prefer the supplied canonical Korean labels over alternative search aliases.
+KO_COUNTRY_LABELS.set('south korea','대한민국');
+KO_COUNTRY_LABELS.set('turkey','터키');
+KO_COUNTRY_LABELS.set('saudi arabia','사우디아라비아');
+KO_COUNTRY_LABELS.set('united arab emirates','아랍에미리트');
+KO_COUNTRY_LABELS.set('czech republic','체코');
+KO_COUNTRY_LABELS.set('north korea','북한');
+function countryNameKorean(value){
+ const raw=String(value||'').trim();
+ if(!raw)return '국가 미분류';
+ const parts=raw.split(/\s*\/\s*/).filter(Boolean);
+ return parts.map(part=>KO_COUNTRY_LABELS.get(part.toLowerCase())||part).join(' / ');
+}
+function articleCountriesForFeed(a){
+ const primary=String(a.SelectedCountry||a.TitleLocation||a.CountriesAffected?.[0]?.Name||'').trim();
+ // Articles explicitly referring to several countries appear in each country's group.
+ const parts=primary.split(/\s*\/\s*/).map(x=>x.trim()).filter(Boolean);
+ return [...new Set(parts.length?parts:['국가 미분류'])];
+}
 function render(){
  const q=$('query').value.trim().toLowerCase(),searchTerms=countrySearchTerms(q),country=$('country').value,sev=$('severity').value,cat=$('category').value,days=Number($('period').value);
  filtered=alerts.filter(a=>{
@@ -169,7 +210,47 @@ function render(){
      if(records.length)appendArticles(records);
      else {const empty=document.createElement('div');empty.className='notice';empty.textContent='해당하는 기사가 없습니다.';frag.append(empty);}
    }
- } else appendArticles(filtered);
+ } else {
+   // Country overview: collapsed by default, groups ordered by newest publication.
+   const grouped=new Map();
+   for(const article of filtered){
+     for(const countryName of articleCountriesForFeed(article)){
+       if(!grouped.has(countryName))grouped.set(countryName,[]);
+       grouped.get(countryName).push(article);
+     }
+   }
+   for(const [countryName,records] of [...grouped.entries()].sort((a,b)=>sortDate(b[1][0])-sortDate(a[1][0])||countryNameKorean(a[0]).localeCompare(countryNameKorean(b[0]),'ko'))){
+     const group=document.createElement('details');group.className='country-alert-group';
+     group.open=expandedAlertCountries.has(countryName);
+     const summary=document.createElement('summary');
+     const title=document.createElement('span');title.textContent=countryNameKorean(countryName);
+     const latest=document.createElement('span');latest.className='country-latest';
+     const date=records[0].Date||records[0].CreatedDate;
+     if(date&&Number.isFinite(Date.parse(date)))latest.textContent=new Date(date).toLocaleDateString('ko-KR',{month:'2-digit',day:'2-digit'});
+     const count=document.createElement('span');count.className='country-group-count';count.textContent=records.length+'건';
+     summary.append(title,latest,count);group.append(summary);
+     // Populate only expanded groups to avoid constructing hundreds of hidden alert nodes.
+     function buildGroupContents(){
+       if(group.dataset.loaded)return;
+       group.dataset.loaded='1';
+       const previousFrag=frag;
+       const items=document.createDocumentFragment();
+       for(const a of records){
+         const d=document.createElement('div');d.className='alert'+(String(a.Id??a.NodeId)===String(activeId)?' active':'');
+         const date=(a.Date||a.CreatedDate)?new Date(a.Date||a.CreatedDate).toLocaleString('ko-KR',{hour12:false}):'시간 미상';
+         d.innerHTML=`<div class="time">${esc(date)} · ${esc(a.SelectedCountry||a.TitleLocation||'')}</div><div class="heading">${esc(plain(a.Heading)||a.Title||'Alert')}</div><div class="meta"><span class="tag sev ${severityClass(a.Severity)}">${esc(severityKo(a.Severity||''))}</span><span class="tag scopeTag scope-${alertScope(a)}">${scopeLabels[alertScope(a)]}</span><span class="tag">${esc(a.Source||'Aviation')}</span>${(a.AffectedAirports||[]).map(c=>`<span class="tag">${esc(c)}</span>`).join('')}${(a.Categories||[]).slice(0,3).map(c=>`<span class="tag">${esc(c)}</span>`).join('')}</div>`;
+         d.onclick=()=>openAlert(a);items.append(d);
+       }
+       group.append(items);
+     }
+     if(group.open)buildGroupContents();
+     group.addEventListener('toggle',()=>{
+       if(group.open){expandedAlertCountries.add(countryName);buildGroupContents();}
+       else expandedAlertCountries.delete(countryName);
+     });
+     frag.append(group);
+   }
+ }
  feed.append(frag);
  try { drawMarkers(); } catch(e) { console.error('Alert marker error',e); mapState.hidden=false;mapState.textContent='마커 표시 오류: '+e.message; }
 }
@@ -289,11 +370,27 @@ function alertPopup(title,items){
  section('동일 국가의 다른 Alert',rest);
  return panel;
 }
-// Leaflet owns the geographic coordinates of every marker. Panning, zooming,
-// resizing and dateline wrapping are handled by its native marker layer.
-// Separate panes enforce airport > local > region > country stacking.
+// Markers are rendered in a dedicated screen overlay above the Canvas map.
+// Reproject on every move/zoom, including longitudinal copies at +/-360°.
+const alertOverlay=$('alert-overlay');
+let overlayRecords=[],overlayFrame=0;
+function positionMarkers(){
+  overlayFrame=0;
+  const size=map.getSize();
+  for(const r of overlayRecords){
+    const xy=map.latLngToContainerPoint(r.coords);
+    const shown=xy.x>=-75&&xy.y>=-60&&xy.x<=size.x+75&&xy.y<=size.y+60;
+    r.el.hidden=!shown;
+    if(shown){r.el.style.left=xy.x+'px';r.el.style.top=xy.y+'px';}
+  }
+}
+function schedulePositionMarkers(){if(!overlayFrame)overlayFrame=requestAnimationFrame(positionMarkers);}
+map.on('move zoom resize viewreset moveend zoomend',schedulePositionMarkers);
+window.addEventListener('resize',()=>{map.invalidateSize();schedulePositionMarkers();},{passive:true});
 function drawMarkers(){
   layer.clearLayers();
+  overlayRecords=[];
+  alertOverlay.replaceChildren();
   const coords=new Map(),byCode=new Map(),byPoint=new Map(),byCountry=new Map();
   for(const ap of airports){
     const code=String(ap.ICAO||'').trim().toUpperCase(),lat=Number(ap.Lat),lng=Number(ap.Lng);
@@ -317,29 +414,34 @@ function drawMarkers(){
     }
   }
   function addOverlay(coords,label,items,mode){
-    const pane={icao:'markerAirport',local:'markerLocal',region:'markerRegion',country:'markerCountry'}[mode];
-    const span=document.createElement('span');
-    span.className=mode==='icao'?'icaoIcon':mode==='local'?'sosPin':mode==='country'?'countryPin':'regionPin';
-    if(mode==='icao'){
-      span.textContent=label;
-      if(items.length>1){const b=document.createElement('b');b.textContent=String(items.length);span.append(b);}
-    } else span.textContent=String(items.length);
-    const wrapper=document.createElement('div');wrapper.className='alert-marker-inner';wrapper.append(span);
-    const icon=L.divIcon({className:'alert-marker-leaflet',html:wrapper.outerHTML,iconSize:[0,0],iconAnchor:[0,0]});
-    const marker=L.marker(coords,{pane,icon,keyboard:true,riseOnHover:false,autoPanOnFocus:false,
-      title:label+' · '+items.length+' Alert',alt:label+' · '+items.length+' Alert'});
-    marker.on('click',()=>{
-      selectMarkerArticles((mode==='country'?'국가 전체 · ':mode==='region'?'광역 · ':'')+label,items,coords,mode==='icao');
-      map.closePopup();
-    });
-    marker.addTo(layer);
+    const cls=mode==='icao'?'icaoIcon':mode==='local'?'sosPin':mode==='country'?'countryPin':'regionPin';
+    for(const shift of [-360,0,360]){
+      const btn=document.createElement('button');
+      btn.type='button';btn.className='alert-map-point';
+      btn.style.zIndex=String({icao:40,local:30,region:20,country:10}[mode]);
+      btn.setAttribute('aria-label',label+' · '+items.length+' Alert');
+      btn.title=label+' · '+items.length+' Alert';
+      const span=document.createElement('span');span.className=cls;
+      if(mode==='icao'){
+        span.textContent=label;
+        if(items.length>1){const b=document.createElement('b');b.textContent=String(items.length);span.append(b);}
+      } else span.textContent=String(items.length);
+      btn.append(span);
+      btn.addEventListener('click',e=>{
+        e.preventDefault();e.stopPropagation();
+        selectMarkerArticles((mode==='country'?'국가 전체 · ':mode==='region'?'광역 · ':'')+label,items,coords,mode==='icao');
+        map.closePopup();
+      });
+      alertOverlay.append(btn);
+      overlayRecords.push({el:btn,coords:[coords[0],coords[1]+shift]});
+    }
   }
-  // Draw low-priority markers first as an additional stacking safeguard.
   for(const {p,items,scope} of byCountry.values())if(scope==='country')addOverlay([p.lat,p.lng],p.name||'Country',items,'country');
   for(const {p,items,scope} of byCountry.values())if(scope!=='country')addOverlay([p.lat,p.lng],p.name||'Region',items,'region');
   for(const {p,items} of byPoint.values())addOverlay([p.lat,p.lng],p.name||'Alert location',items,'local');
   for(const [code,items] of byCode)addOverlay(coords.get(code),code,items,'icao');
-  if(!layer.getLayers().length&&filtered.length){mapState.hidden=false;mapState.textContent='표시할 위치 정보가 없습니다';}
+  schedulePositionMarkers();
+  if(!overlayRecords.length&&filtered.length){mapState.hidden=false;mapState.textContent='표시할 위치 정보가 없습니다';}
   else mapState.hidden=true;
 }
 
