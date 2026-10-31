@@ -189,6 +189,20 @@ html.portal-auth-pending #appRoot{display:none!important}
 #appRoot{min-height:100vh}
 #authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#0d1422;color:#e8edf5;font-size:15px;font-weight:700;text-align:center}
 html.portal-auth-ready #authScreen{visibility:visible}
+
+/* Small-screen page scrolling: map first, then filters and Alert list.
+   Do not trap the entire page inside a viewport-height flex container. */
+@media (max-width:760px){
+  html,body{height:auto!important;min-height:100%!important;overflow-x:hidden!important;overflow-y:auto!important;}
+  body{display:block!important;position:static!important;}
+  #appRoot{height:auto!important;min-height:100dvh!important;overflow:visible!important;}
+  #appRoot>.shell{display:flex!important;flex-direction:column!important;height:auto!important;min-height:0!important;overflow:visible!important;}
+  #appRoot .shell>.mapwrap{order:0!important;flex:0 0 auto!important;width:100%!important;height:38dvh!important;min-height:210px!important;max-height:400px!important;overflow:hidden!important;}
+  #appRoot .shell>.side{order:1!important;flex:0 0 auto!important;width:100%!important;height:auto!important;min-height:0!important;overflow:visible!important;border-right:0!important;}
+  #appRoot .side>.feed{flex:0 0 auto!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;overscroll-behavior:auto!important;}
+  #appRoot .side>.controls,#appRoot .side>.count,#appRoot .side>.foot{flex-shrink:0!important;}
+  #map{touch-action:pan-y!important;}
+}
 </style></head>
 <body>
 <div id="authScreen" style="display:flex">승인 확인 중...</div>
@@ -1173,6 +1187,18 @@ map.on('zoomend',updateFlightLabels);
 if(!['loadRemote','routeHL8080','routeHL8372'].every(id=>document.getElementById(id))){throw new Error('ROUTES v6.1 header controls missing');}
 $('routeHL8080').addEventListener('click',()=>toggleFlightRoute('HL8080'));
 $('routeHL8372').addEventListener('click',()=>toggleFlightRoute('HL8372'));
+
+
+// On phone-size screens, a one-finger swipe over the map scrolls the page
+// to the Alert list instead of endlessly panning the ocean.
+// Zoom controls, marker taps, and two-finger zoom remain available.
+function medaireApplyMobileMapTouchMode(){
+ const compact=window.matchMedia('(max-width:760px)').matches;
+ if(compact){map.dragging.disable();map.scrollWheelZoom.disable();}
+ else{map.dragging.enable();map.scrollWheelZoom.enable();}
+}
+medaireApplyMobileMapTouchMode();
+window.addEventListener('resize',medaireApplyMobileMapTouchMode,{passive:true});
 
 // All alert data loads wait until common-auth confirms the current user's app permission.
 let medaireStartedAfterAuth=false;
