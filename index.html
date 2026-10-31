@@ -84,6 +84,10 @@
 .flight-wp-item{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;display:flex;align-items:center;gap:5px;white-space:nowrap;border:0;background:transparent;padding:0;cursor:pointer}
 .flight-wp-dot{width:13px;height:13px;border-radius:50%;border:2px solid #f4f7fc;box-shadow:0 0 0 1px #142538,0 1px 6px #000b;flex:0 0 13px}
 .flight-wp-name{padding:2px 5px;border:1px solid;border-radius:4px;background:#182535ec;font-size:11px;line-height:1.35;font-weight:750;color:#fff;box-shadow:0 1px 5px #0009}
+/* Waypoint labels: route-perpendicular orientation and cross-aircraft collision avoidance */
+.flight-wp-item{display:block!important;overflow:visible!important;width:13px;height:13px}
+.flight-wp-dot{display:block}
+.flight-wp-name{position:absolute;left:16px;top:6px;transform-origin:left center;pointer-events:none;display:inline-block;white-space:nowrap;will-change:transform}
 .flight-wp-item:hover .flight-wp-dot,.flight-wp-item:focus-visible .flight-wp-dot{outline:3px solid #fff9a6;outline-offset:2px}
 /* ROUTES v2: make top controls visible even on narrow desktops and mobile */
 .top{display:flex!important;align-items:center;min-height:51px;gap:8px}
@@ -787,12 +791,34 @@ function requestFlightDraw(){
  flightDrawPending=true;
  requestAnimationFrame(()=>{flightDrawPending=false;drawFlightRoutes();});
 }
+function flightRectsOverlap(a,b){return !(a.right<b.left||a.left>b.right||a.bottom<b.top||a.top>b.bottom);}
+function flightWaypointLabelAngle(point,paths,shift,w,h){
+ let nearest=null,best=Infinity;
+ // Compare the waypoint with each segment in its matching world copy.
+ for(const path of paths||[]){
+  for(let i=0;i<path.length-1;i++){
+   const a=map.latLngToContainerPoint([path[i][0],path[i][1]+shift]);
+   const b=map.latLngToContainerPoint([path[i+1][0],path[i+1][1]+shift]);
+   const dx=b.x-a.x,dy=b.y-a.y,len2=dx*dx+dy*dy;
+   if(len2<1)continue;
+   const t=Math.max(0,Math.min(1,((point.x-a.x)*dx+(point.y-a.y)*dy)/len2));
+   const d=(point.x-a.x-t*dx)**2+(point.y-a.y-t*dy)**2;
+   if(d<best){best=d;nearest={dx,dy};}
+  }
+ }
+ if(!nearest)return 0;
+ const direction=Math.atan2(nearest.dy,nearest.dx)*180/Math.PI;
+ const a=direction+90,b=direction-90;
+ const angle=Math.sin(a*Math.PI/180)>=Math.sin(b*Math.PI/180)?a:b;
+ return ((angle+180)%360+360)%360-180;
+}
 function drawFlightRoutes(){
  const w=flightSvg.clientWidth,h=flightSvg.clientHeight;
  if(!w||!h)return;
  flightSvg.setAttribute('viewBox',`0 0 ${w} ${h}`);
  flightSvg.replaceChildren();
  flightWaypointOverlay.replaceChildren();
+ const flightLabelRects=[]; // shared across HL8080 and HL8372
  for(const [tail,cfg] of Object.entries(flightRoutes)){
   if(!cfg.layer||!cfg.paths)continue;
   const pathEl=document.createElementNS(FLIGHT_SVG_NS,'path');
@@ -818,8 +844,8 @@ function drawFlightRoutes(){
   pathEl.setAttribute('stroke-opacity','1');
   pathEl.style.filter='drop-shadow(0 0 2px #0b1723)';
   flightSvg.appendChild(pathEl);
-  // Draw waypoints with the same container-point projection used by visible SVG lines.
-  // Leaflet marker panes sit behind the independent vector/alert overlays in this app.
+  // Use screen-space nearest route segment to orient labels perpendicular to the route.
+  // Pins remain visible and clickable even when a label must be suppressed.
   const shown=new Set();
   for(const wp of cfg.waypoints||[]){
    for(const shift of [-720,-360,0,360,720]){
@@ -830,7 +856,14 @@ function drawFlightRoutes(){
     const pin=document.createElement('button');pin.type='button';pin.className='flight-wp-item';
     pin.style.left=pt.x+'px';pin.style.top=pt.y+'px';pin.title=tail+' · '+wp.name;
     const dot=document.createElement('span');dot.className='flight-wp-dot';dot.style.background=cfg.color;pin.append(dot);
-    if(map.getZoom()>=4){const label=document.createElement('span');label.className='flight-wp-name';label.style.borderColor=cfg.color;label.textContent=wp.name;pin.append(label);}
+    if(map.getZoom()>=4){
+     const label=document.createElement('span');label.className='flight-wp-name';
+     label.style.borderColor=cfg.color;label.textContent=wp.name;
+     // Rotating a horizontal label around its left edge keeps it next to the waypoint.
+     const angle=flightWaypointLabelAngle(pt,cfg.paths,shift,w,h);
+     label.style.transform='rotate('+angle+'deg)';
+     pin.append(label);
+    }
     pin.addEventListener('click',event=>{
      event.stopPropagation();
      const content=document.createElement('div');
@@ -839,6 +872,15 @@ function drawFlightRoutes(){
      L.popup({maxWidth:320}).setLatLng([wp.pos[0],wp.pos[1]+shift]).setContent(content).openOn(map);
     });
     flightWaypointOverlay.append(pin);
+    const label=pin.querySelector('.flight-wp-name');
+    if(label){
+     const rect=label.getBoundingClientRect();
+     const pad=3;
+     const r={left:rect.left-pad,right:rect.right+pad,top:rect.top-pad,bottom:rect.bottom+pad};
+     if(!rect.width||!rect.height||flightLabelRects.some(other=>flightRectsOverlap(r,other))){
+      label.remove(); // hide label only; never hide waypoint marker or popup
+     }else flightLabelRects.push(r);
+    }
    }
   }
  }
