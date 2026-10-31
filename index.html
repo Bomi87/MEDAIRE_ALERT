@@ -16,7 +16,7 @@
 .scope-icao{background:#263f67;border-color:#a8c9fa}
 .scope-local{background:#13585c;border-color:#54d0ca;color:#bafbf4}
 .scope-region{background:#53336e;border-color:#c6a0e6}
-.scope-country{background:#1d536e;border-color:#77b9da}
+.scope-country{background:#1d3f89;border-color:#79aaff;color:#e0ebff}
 /* Mobile compact controls: prioritize the Alert feed over search/filter chrome. */
 @media (max-width:760px){
   .top{padding:5px 8px;gap:4px;}
@@ -72,7 +72,7 @@
 @media(max-width:760px){.country-alert-group>summary{padding:10px 11px}.country-alert-group>.alert{padding-left:14px}}
 </style></head>
 <body><header class="top"><h1>✈ MedAire Alert Monitor</h1><span id="status" class="status">데이터를 불러오세요</span><div class="connect"><input id="backend" value="https://script.google.com/macros/s/AKfycbzHiJfw__LOpkZSwx_i0KU3YgCXSxQMocrm175qTbpsus5Ze7VPSnub2rvtpUBexQNQ-Q/exec" placeholder="Apps Script /exec URL" aria-label="백엔드 URL"><button class="btn" id="loadRemote">서버 조회</button><label class="btn fileBtn">JSON 불러오기<input class="hide" type="file" id="fileInput" accept=".json,.txt,application/json" multiple></label></div></header>
-<div class="shell"><section class="side"><div class="controls"><div class="query-combo"><input id="query" placeholder="국가, 공항 ICAO, 내용 검색" autocomplete="off" aria-autocomplete="list" aria-controls="countrySuggestions" aria-expanded="false"><div id="countrySuggestions" class="country-suggestions" role="listbox" hidden></div></div><select id="country"><option value="">모든 국가</option></select><select id="severity"><option value="">모든 심각도</option></select><select id="category"><option value="">모든 카테고리</option></select><select id="period"><option value="1">최근 24시간</option><option value="3" selected>최근 3일</option><option value="7">최근 7일</option><option value="30">최근 30일</option></select></div><div class="count" id="count">Alert 0건</div><div class="feed" id="feed"><div class="notice">서버에서 Alert를 자동 조회합니다.</div></div><div class="foot">· 청록=특정 위치 / 파랑=특정 국가 / 보라=여러 국가 또는 넓은 지역 </div></section><div class="mapwrap"><div id="map"></div><div id="alert-overlay" aria-label="Alert 위치 마커"></div><div id="mapstate" role="status">지도 준비 중…</div></div></div>
+<div class="shell"><section class="side"><div class="controls"><div class="query-combo"><input id="query" placeholder="국가, 공항 ICAO, 내용 검색" autocomplete="off" aria-autocomplete="list" aria-controls="countrySuggestions" aria-expanded="false"><div id="countrySuggestions" class="country-suggestions" role="listbox" hidden></div></div><select id="country"><option value="">모든 국가</option></select><select id="severity"><option value="">모든 심각도</option></select><select id="category"><option value="">모든 카테고리</option></select><select id="period"><option value="1">최근 24시간</option><option value="3" selected>최근 3일</option><option value="7">최근 7일</option><option value="30">최근 30일</option></select></div><div class="count" id="count">Alert 0건</div><div class="feed" id="feed"><div class="notice">서버에서 Alert를 자동 조회합니다.</div></div><div class="foot">최신 발행 Alert가 항상 맨 위 · 지도: 공항 ICAO · 청록=특정 위치 / 파랑=특정 국가 / 보라=여러 국가 또는 넓은 지역</div></section><div class="mapwrap"><div id="map"></div><div id="alert-overlay" aria-label="Alert 위치 마커"></div><div id="mapstate" role="status">지도 준비 중…</div></div></div>
 <div class="modal" id="modal"><div class="modalbody"><button class="btn close" id="close" aria-label="닫기" title="닫기">×</button><div id="details"></div></div></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
@@ -325,7 +325,12 @@ function pointScope(p,a){
  const name=normalizedPlace(p.name);
  const cn=countryParts(p.countryName).map(normalizedPlace);
  const title=normalizedPlace(a.TitleLocation||a.SelectedCountry||'');
+ // A country-name point can lack CountryNameList in some International SOS records.
+ // Match it against the supplied country dictionary (including aliases).
+ const knownCountries=new Set(KO_COUNTRY_SEARCH.flatMap(([ko,en])=>en.split(/\s*\/\s*/).map(normalizedPlace)));
+ for(const extra of ['türkiye','turkiye','taiwan (china)','south korea','north korea'])knownCountries.add(normalizedPlace(extra));
  if(!name)return 'region';
+ if(knownCountries.has(name))return 'country';
  if(isRegion(p.name) || isRegion(a.TitleLocation||a.SelectedCountry||'')){
    // Explicit named city / airport is still local even under a regional headline.
    if(cn.includes(name))return 'country';
