@@ -52,6 +52,10 @@
 #alert-overlay{position:absolute;inset:0;z-index:650;pointer-events:none;overflow:hidden}
 .alert-map-point{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;background:transparent;border:0;padding:0;margin:0;cursor:pointer;white-space:nowrap;line-height:1}
 .alert-map-point[hidden]{display:none!important}
+.article-marker-selected{filter:drop-shadow(0 0 5px #ffea7a) drop-shadow(0 0 10px #ffe28b);animation:medaireMarkerPulse 1.5s ease-in-out infinite;}
+.article-marker-selected>span{outline:3px solid #fff08b;outline-offset:3px;border-radius:9px;box-shadow:0 0 0 5px rgba(255,201,52,.4)!important;}
+@keyframes medaireMarkerPulse{0%,100%{filter:drop-shadow(0 0 4px #ffe481)}50%{filter:drop-shadow(0 0 13px #ffd54f) drop-shadow(0 0 6px #fff)}}
+@media(prefers-reduced-motion:reduce){.article-marker-selected{animation:none}}
 .alert-map-point:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:5px}
 .alert-map-point .icaoIcon,.alert-map-point .sosPin,.alert-map-point .countryPin,.alert-map-point .regionPin{display:inline-flex;align-items:center;justify-content:center}
 
@@ -68,7 +72,7 @@
 @media(max-width:760px){.country-alert-group>summary{padding:10px 11px}.country-alert-group>.alert{padding-left:14px}}
 </style></head>
 <body><header class="top"><h1>✈ MedAire Alert Monitor</h1><span id="status" class="status">데이터를 불러오세요</span><div class="connect"><input id="backend" value="https://script.google.com/macros/s/AKfycbzHiJfw__LOpkZSwx_i0KU3YgCXSxQMocrm175qTbpsus5Ze7VPSnub2rvtpUBexQNQ-Q/exec" placeholder="Apps Script /exec URL" aria-label="백엔드 URL"><button class="btn" id="loadRemote">서버 조회</button><label class="btn fileBtn">JSON 불러오기<input class="hide" type="file" id="fileInput" accept=".json,.txt,application/json" multiple></label></div></header>
-<div class="shell"><section class="side"><div class="controls"><div class="query-combo"><input id="query" placeholder="국가, 공항 ICAO, 내용 검색" autocomplete="off" aria-autocomplete="list" aria-controls="countrySuggestions" aria-expanded="false"><div id="countrySuggestions" class="country-suggestions" role="listbox" hidden></div></div><select id="country"><option value="">모든 국가</option></select><select id="severity"><option value="">모든 심각도</option></select><select id="category"><option value="">모든 카테고리</option></select><select id="period"><option value="1">최근 24시간</option><option value="3" selected>최근 3일</option><option value="7">최근 7일</option><option value="30">최근 30일</option></select></div><div class="count" id="count">Alert 0건</div><div class="feed" id="feed"><div class="notice">서버에서 Alert를 자동 조회합니다.</div></div><div class="foot">최신 발행 Alert가 항상 맨 위 · 지도: 공항 ICAO · 청록=특정 위치 · 파랑=국가 대표점 · 보라=광역 대표점</div></section><div class="mapwrap"><div id="map"></div><div id="alert-overlay" aria-label="Alert 위치 마커"></div><div id="mapstate" role="status">지도 준비 중…</div></div></div>
+<div class="shell"><section class="side"><div class="controls"><div class="query-combo"><input id="query" placeholder="국가, 공항 ICAO, 내용 검색" autocomplete="off" aria-autocomplete="list" aria-controls="countrySuggestions" aria-expanded="false"><div id="countrySuggestions" class="country-suggestions" role="listbox" hidden></div></div><select id="country"><option value="">모든 국가</option></select><select id="severity"><option value="">모든 심각도</option></select><select id="category"><option value="">모든 카테고리</option></select><select id="period"><option value="1">최근 24시간</option><option value="3" selected>최근 3일</option><option value="7">최근 7일</option><option value="30">최근 30일</option></select></div><div class="count" id="count">Alert 0건</div><div class="feed" id="feed"><div class="notice">서버에서 Alert를 자동 조회합니다.</div></div><div class="foot">· 청록=특정 위치 / 파랑=특정 국가 / 보라=여러 국가 또는 넓은 지역 </div></section><div class="mapwrap"><div id="map"></div><div id="alert-overlay" aria-label="Alert 위치 마커"></div><div id="mapstate" role="status">지도 준비 중…</div></div></div>
 <div class="modal" id="modal"><div class="modalbody"><button class="btn close" id="close" aria-label="닫기" title="닫기">×</button><div id="details"></div></div></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
@@ -124,6 +128,7 @@ function rebuildOptions(){
 }
 // Static Korean-to-English country dictionary supplied for MedAire country search.
 const KO_COUNTRY_SEARCH = [["솔로몬 제도","Solomon Islands"],["나우루","Nauru"],["파푸아 뉴기니","Papua New Guinea"],["그린란드","Greenland"],["아이슬란드","Iceland"],["캐나다","Canada"],["알제리","Algeria"],["가나","Ghana"],["아이보리 해안","Ivory Coast"],["나이지리아","Nigeria"],["니제르","Niger"],["튀니지","Tunisia"],["벨기에","Belgium"],["독일","Germany"],["벨기에 / 독일 / 네덜란드","Belgium / Germany / Netherlands"],["에스토니아","Estonia"],["핀란드","Finland"],["영국","United Kingdom"],["네덜란드","Netherlands"],["아일랜드","Ireland"],["덴마크","Denmark"],["노르웨이","Norway"],["폴란드","Poland"],["스웨덴","Sweden"],["라트비아","Latvia"],["리투아니아","Lithuania"],["보츠와나","Botswana"],["콩고 공화국","Republic of the Congo"],["모리셔스","Mauritius"],["카메룬","Cameroon"],["잠비아","Zambia"],["코모로","Comoros"],["마다가스카르","Madagascar"],["앙골라","Angola"],["가봉","Gabon"],["모잠비크","Mozambique"],["세이셸","Seychelles"],["차드","Chad"],["짐바브웨","Zimbabwe"],["말라위","Malawi"],["콩고민주공화국","Democratic Republic of the Congo"],["카나리아 제도 ( 스페인 )","Canary Islands (Spain)"],["세네갈","Senegal"],["모로코","Morocco"],["카보베르데","Cape Verde"],["에티오피아","Ethiopia"],["부룬디","Burundi"],["소말리아","Somalia"],["이집트","Egypt"],["에리트레아","Eritrea"],["케냐","Kenya"],["리비아","Libya"],["르완다","Rwanda"],["수단","Sudan"],["탄자니아","Tanzania"],["우간다","Uganda"],["미국","United States"],["알바니아","Albania"],["불가리아","Bulgaria"],["키프로스","Cyprus"],["크로아티아","Croatia"],["스페인","Spain"],["프랑스","France"],["그리스","Greece"],["헝가리","Hungary"],["이탈리아","Italy"],["슬로베니아","Slovenia"],["체코 공화국","Czech Republic"],["이스라엘","Israel"],["몰타","Malta"],["오스트리아","Austria"],["포르투갈","Portugal"],["아조레스 제도(포르투갈 )","Azores (Portugal)"],["보스니아 헤르체고비나","Bosnia and Herzegovina"],["루마니아","Romania"],["스위스","Switzerland"],["터키","Turkey"],["몰도바","Moldova"],["북 마케도니아","North Macedonia"],["세르비아","Serbia"],["슬로바키아","Slovakia"],["도미니카 공화국","Dominican Republic"],["온두라스","Honduras"],["자메이카","Jamaica"],["멕시코","Mexico"],["파나마","Panama"],["아이티","Haiti"],["쿠바","Cuba"],["바하마","Bahamas"],["피지","Fiji"],["프랑스령 폴리네시아 ( 프랑스 )","French Polynesia (France)"],["뉴칼레도니아 ( 프랑스 )","New Caledonia (France)"],["뉴질랜드","New Zealand"],["아프가니스탄","Afghanistan"],["바레인","Bahrain"],["사우디 아라비아","Saudi Arabia"],["이란","Iran"],["요르단","Jordan"],["쿠웨이트","Kuwait"],["레바논","Lebanon"],["아랍 에미리트","United Arab Emirates"],["오만","Oman"],["파키스탄","Pakistan"],["이라크","Iraq"],["시리아","Syria"],["예멘","Yemen"],["대만","Taiwan"],["일본","Japan"],["대한민국","South Korea"],["필리핀","Philippines"],["아르헨티나","Argentina"],["브라질","Brazil"],["칠레","Chile"],["에콰도르","Ecuador"],["파라과이","Paraguay"],["콜롬비아","Colombia"],["볼리비아","Bolivia"],["수리남","Suriname"],["프랑스령 기아나 ( 프랑스 )","French Guiana (France)"],["페루","Peru"],["우루과이","Uruguay"],["베네수엘라","Venezuela"],["가이아나","Guyana"],["푸에르토리코 ( 미국 )","Puerto Rico (United States)"],["퀴라소 ( 네덜란드 )","Curacao (Netherlands)"],["트리니다드토바고","Trinidad and Tobago"],["타지키스탄","Tajikistan"],["키르기스스탄","Kyrgyzstan"],["아르메니아","Armenia"],["러시아","Russia"],["조지아","Georgia"],["우크라이나","Ukraine"],["벨라루스","Belarus"],["남수단","South Sudan"],["우즈베키스탄","Uzbekistan"],["스리랑카","Sri Lanka"],["아제르바이잔","Azerbaijan"],["방글라데시","Bangladesh"],["홍콩","Hong Kong"],["라오스","Laos"],["네팔","Nepal"],["몰디브","Maldives"],["태국","Thailand"],["미얀마","Myanmar"],["인도네시아","Indonesia"],["브루나이","Brunei"],["말레이시아","Malaysia"],["싱가포르","Singapore"],["호주","Australia"],["중국","China"],["중국(산야)","China (Sanya)"],["북한","North Korea"],["몽골","Mongolia"],["캄보디아","Cambodia"],["베트남","Vietnam"],["인도","India"],["카자흐스탄","Kazakhstan"],["투르크메니스탄","Turkmenistan"],["나미비아","Namibia"],["남아프리카","South Africa"],["앤티가 바부다","Antigua and Barbuda"],["카타르","Qatar"],["한국","South Korea"],["남한","South Korea"],["한국/대한민국","South Korea"],["미합중국","United States"],["미국령","United States"],["영국령","United Kingdom"],["코트디부아르","Ivory Coast"],["체코","Czech Republic"],["UAE","United Arab Emirates"],["아랍에미리트","United Arab Emirates"],["사우디아라비아","Saudi Arabia"],["DR콩고","Democratic Republic of the Congo"],["콩고 민주 공화국","Democratic Republic of the Congo"]];
+KO_COUNTRY_SEARCH.push(['벨리즈','Belize'],['부탄','Bhutan'],['말리','Mali'],['터키','Türkiye'],['대만','Taiwan (China)']);
 function countrySearchTerms(input){
  const q=String(input||'').trim().toLocaleLowerCase();
  if(!q)return [];
@@ -155,11 +160,12 @@ KO_COUNTRY_LABELS.set('saudi arabia','사우디아라비아');
 KO_COUNTRY_LABELS.set('united arab emirates','아랍에미리트');
 KO_COUNTRY_LABELS.set('czech republic','체코');
 KO_COUNTRY_LABELS.set('north korea','북한');
+for(const [en,ko] of [['belize','벨리즈'],['bhutan','부탄'],['türkiye','터키'],['turkiye','터키'],['taiwan (china)','대만'],['mali','말리']])KO_COUNTRY_LABELS.set(en,ko);
 function countryNameKorean(value){
  const raw=String(value||'').trim();
  if(!raw)return '국가 미분류';
- const parts=raw.split(/\s*\/\s*/).filter(Boolean);
- return parts.map(part=>KO_COUNTRY_LABELS.get(part.toLowerCase())||part).join(' / ');
+ const parts=raw.split(/\s*[,;/]\s*/).filter(Boolean);
+ return parts.map(part=>KO_COUNTRY_LABELS.get(part.toLowerCase())||part).join(', ');
 }
 function articleCountriesForFeed(a){
  const primary=String(a.SelectedCountry||a.TitleLocation||a.CountriesAffected?.[0]?.Name||'').trim();
@@ -370,6 +376,16 @@ function alertPopup(title,items){
  section('동일 국가의 다른 Alert',rest);
  return panel;
 }
+// Keep the article currently opened visually identifiable on the world map.
+let highlightedArticleKey='';
+function updateHighlightedMarkers(){
+ for(const r of overlayRecords){
+  const match=!!highlightedArticleKey&&r.items.some(a=>articleKey(a)===highlightedArticleKey);
+  r.el.classList.toggle('article-marker-selected',match);
+  if(match)r.el.style.zIndex='999';
+  else r.el.style.zIndex=String({icao:40,local:30,region:20,country:10}[r.mode]);
+ }
+}
 // Markers are rendered in a dedicated screen overlay above the Canvas map.
 // Reproject on every move/zoom, including longitudinal copies at +/-360°.
 const alertOverlay=$('alert-overlay');
@@ -433,19 +449,20 @@ function drawMarkers(){
         map.closePopup();
       });
       alertOverlay.append(btn);
-      overlayRecords.push({el:btn,coords:[coords[0],coords[1]+shift]});
+      overlayRecords.push({el:btn,coords:[coords[0],coords[1]+shift],items,mode});
     }
   }
   for(const {p,items,scope} of byCountry.values())if(scope==='country')addOverlay([p.lat,p.lng],p.name||'Country',items,'country');
   for(const {p,items,scope} of byCountry.values())if(scope!=='country')addOverlay([p.lat,p.lng],p.name||'Region',items,'region');
   for(const {p,items} of byPoint.values())addOverlay([p.lat,p.lng],p.name||'Alert location',items,'local');
   for(const [code,items] of byCode)addOverlay(coords.get(code),code,items,'icao');
+  updateHighlightedMarkers();
   schedulePositionMarkers();
   if(!overlayRecords.length&&filtered.length){mapState.hidden=false;mapState.textContent='표시할 위치 정보가 없습니다';}
   else mapState.hidden=true;
 }
 
-function openAlert(a){activeId=a.Id??a.NodeId;const codes=(a.AffectedAirports||[]).map(String),name=plain(a.Heading)||a.Title||'Alert';
+function openAlert(a){activeId=a.Id??a.NodeId;highlightedArticleKey=articleKey(a);updateHighlightedMarkers();const codes=(a.AffectedAirports||[]).map(String),name=plain(a.Heading)||a.Title||'Alert';
  $('details').innerHTML=`<div class="time">${esc(a.Date?new Date(a.Date).toLocaleString('ko-KR',{hour12:false}):'')} · ${esc(a.SelectedCountry||'')}</div><h2>${esc(name)}</h2><p><b>Source:</b> ${esc(a.Source||'Aviation')}<br><b>Severity:</b> <span class="sev detail-severity ${severityClass(a.Severity)}">${esc(severityKo(a.Severity||'–'))}</span><br><b>Status:</b> ${esc(a.AlertStatus||'–')}<br><b>ICAO:</b> ${esc(codes.join(', ')||'–')}<br><b>Category:</b> ${esc((a.Categories||[]).join(', '))}</p><div class="detailtext" id="bodyText"></div>`;
  const sections=[['Summary',a.Summary||a.Blocks],['Traveller advice',a.TravellerAdvice],['More detail',a.MoreDetail]];
  const dest=$('bodyText');dest.replaceChildren();
@@ -453,9 +470,14 @@ function openAlert(a){activeId=a.Id??a.NodeId;const codes=(a.AffectedAirports||[
  if(!dest.childNodes.length)dest.textContent='상세 내용 없음';
  $('modal').classList.add('open');
  const points=locationPoints(a);const p=points.find(x=>x.primary)||points[0];
+ const matchingMarker=overlayRecords.find(r=>r.items.some(x=>articleKey(x)===highlightedArticleKey)&&r.mode==='icao')
+   ||overlayRecords.find(r=>r.items.some(x=>articleKey(x)===highlightedArticleKey)&&r.mode==='local')
+   ||overlayRecords.find(r=>r.items.some(x=>articleKey(x)===highlightedArticleKey)&&r.mode==='region')
+   ||overlayRecords.find(r=>r.items.some(x=>articleKey(x)===highlightedArticleKey));
  const found=airports.find(x=>codes.includes(String(x.ICAO||'').toUpperCase())&&Number.isFinite(Number(x.Lat))&&Number.isFinite(Number(x.Lng)));
- if(found)map.setView([Number(found.Lat),Number(found.Lng)],Math.max(map.getZoom(),6));
- else if(p)map.setView([p.lat,p.lng],Math.max(map.getZoom(),5));
+ if(matchingMarker)map.setView(matchingMarker.coords,Math.max(map.getZoom(),matchingMarker.mode==='icao'?6:4),{animate:false});
+ else if(found)map.setView([Number(found.Lat),Number(found.Lng)],Math.max(map.getZoom(),6),{animate:false});
+ else if(p)map.setView([p.lat,p.lng],Math.max(map.getZoom(),5),{animate:false});
 }
 $('close').onclick=()=>$('modal').classList.remove('open');$('modal').onclick=e=>{if(e.target===$('modal'))$('modal').classList.remove('open');};
 // Display matching country candidates while the user types; selection keeps a searchable Korean name.
