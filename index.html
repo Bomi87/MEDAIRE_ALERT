@@ -943,7 +943,7 @@ for(const id of ['query','country','severity','category','period'])$(id).addEven
 
 // JSONP avoids GAS cross-origin redirect limitations. No credentials are sent from the browser.
 let syncing=false;
-async function sync(){if(!window.CURRENT_PORTAL_USER)return;if(syncing)return;const url=$('backend').value.trim();
+async function sync(forceRefresh=false){if(!window.CURRENT_PORTAL_USER)return;if(syncing)return;const url=$('backend').value.trim();
  if(!/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(url)){alert('올바른 Apps Script /exec URL을 입력해 주세요.');return;}
  syncing=true;$('status').textContent='MedAire 조회 중… (응답 대기)';
  const cb='medaireCb'+Date.now(),s=document.createElement('script');let done=false;
@@ -952,7 +952,7 @@ async function sync(){if(!window.CURRENT_PORTAL_USER)return;if(syncing)return;co
  if(err){$('status').textContent='오류: '+err.message;return;}try{ingest(data);}catch(e){$('status').textContent='오류: '+e.message;}}
  window[cb]=data=>finish(null,data);
  s.onerror=()=>finish(new Error('네트워크 오류 / 배포 또는 권한 확인'));
- s.src=url+'?action=feed&callback='+encodeURIComponent(cb);
+ s.src=url+'?action=feed&callback='+encodeURIComponent(cb)+(forceRefresh?'&force=1':'');
  document.head.append(s);
 }
 
@@ -1202,7 +1202,7 @@ window.addEventListener('resize',medaireApplyMobileMapTouchMode,{passive:true});
 
 // All alert data loads wait until common-auth confirms the current user's app permission.
 let medaireStartedAfterAuth=false;
-$('loadRemote').onclick=()=>{if(window.CURRENT_PORTAL_USER)sync();};
+$('loadRemote').onclick=()=>{if(window.CURRENT_PORTAL_USER)sync(true);};
 setInterval(()=>{if(window.CURRENT_PORTAL_USER && !document.hidden && $('backend').value.trim())sync();},120000);
 window.addEventListener('resize',()=>map.invalidateSize(),{passive:true});
 window.startProtectedApp=function(){
